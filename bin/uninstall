@@ -9,9 +9,15 @@ case $answer in
   *) echo "aborted"; exit 1 ;;
 esac
 
+status=0
 bin/stop
-bin/telemetry-off
-bin/grafana-off
+bin/telemetry-off || status=1
+bin/grafana-off || status=1
+
+if [ "$status" -ne 0 ]; then
+  echo "uninstall: a launchd job above is still loaded, and deleting $ROOT now would leave it registered" >&2
+  exit 1
+fi
 
 cat <<MSG
 
