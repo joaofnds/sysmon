@@ -13,8 +13,8 @@ only, and the scripts need Nix with flakes enabled.
 
 Beside them, an OpenTelemetry collector records Claude Code's telemetry in ClickHouse. Those
 two run under launchd and start again at login. Grafana charts both kinds of data and runs
-only from `bin/grafana` to `bin/grafana-off`. Nix pins these three as well. See Claude
-telemetry below.
+from `bin/grafana` until `bin/grafana-off` or logout. Nix pins these three as well. See
+Claude telemetry below.
 
 ## Use
 
@@ -141,7 +141,9 @@ Grafana's official darwin-arm64 build and the ClickHouse datasource plugin by ha
 starting it compiles nothing and installs no plugin. Grafana runs each datasource plugin as
 a process of its own, so `bin/grafana` turns off the ones it bundles that no dashboard uses,
 through `GF_PLUGINS_DISABLE_PLUGINS`. Take a plugin off that list before adding a datasource
-of its kind.
+of its kind. Grafana reads the settings in `bin/grafana` only when it starts, and
+`bin/grafana` leaves a running Grafana as it is, so restart it with
+`bin/grafana-off && bin/grafana` after editing them or updating the flake.
 
 The collected events live in `clickhouse-data/`. To query them:
 
@@ -188,7 +190,7 @@ collector.
 | `clickhouse-data/` | ClickHouse storage, holding the Claude telemetry events |
 | `grafana-data/` | Grafana's own database |
 | `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics, and the output of ClickHouse, the collector and Grafana |
-| `run/` | PID files, and Grafana's launchd agent while it runs |
+| `run/` | PID files, and Grafana's launchd agent from `bin/grafana` to `bin/grafana-off` |
 | `secrets/` | The generated passwords of the `otel` and `grafana` ClickHouse users |
 | `result-mactop`, `result-sysmon-procs`, `result-claude-limits`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
 | `result-clickhouse`, `result-otelcol-contrib` | Links to the Nix store paths `bin/telemetry-on` runs |
