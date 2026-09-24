@@ -18,6 +18,48 @@ UI: http://127.0.0.1:8428/vmui, with the prepared dashboard under the Dashboards
 
 Both listen on 127.0.0.1 only: mactop on port 2112, VictoriaMetrics on 8428.
 
+## Claude telemetry
+
+A Docker Compose stack stores Claude Code's OpenTelemetry events in ClickHouse and charts
+them in Grafana, so token spend can be broken down by model, subagent, skill, MCP server,
+repository, session, prompt, and tool. Claude Code exports to it through the `OTEL_*`
+entries in `~/.claude/settings.json`.
+
+Unlike mactop and VictoriaMetrics, it runs in OrbStack and restarts with it. Start it once:
+
+    docker compose -f ~/code/sysmon/compose.yaml up -d
+
+Rerun it with `--force-recreate` after editing any of its files. The services read their
+files only when they start, `up -d` alone leaves a running container as it is, and the
+`schema` service reapplies `schema.sql` on every start.
+
+The collected events live in the Docker volumes `claude-telemetry_clickhouse` and
+`claude-telemetry_grafana`, named after the Compose project, not this folder.
+
+`clickhouse.xml` turns off ClickHouse's own system log tables, which otherwise double its
+idle CPU and memory. It lists the log sections of the pinned image's `config.xml`, so
+recheck it when bumping the image.
+
+- Dashboard: http://localhost:3030
+- SQL: `docker compose -f ~/code/sysmon/compose.yaml exec clickhouse clickhouse-client -u otel --password otel -d otel`
+
+`schema.sql` defines the views to query (`api_requests`, `prompts`, `tool_results`,
+`subagent_runs`, `session_first_prompts`) and keeps 90 days of events. `api_requests`
+splits each request's cost into input, cache reads, cache writes and output using the
+per-model prices in `model_prices`. A request whose model is missing from that list, or
+that ran at a speed other than normal, shows all its spend as "Other" on the dashboard.
+
+ClickHouse publishes no port to the host, because its HTTP interface answers any web page;
+reach it through Grafana or `docker compose exec`. Grafana connects as the `grafana` user
+from `clickhouse-users.xml`, which may only select from the `otel` database. A Grafana link
+runs its query when opened, so that user must not gain writes or `url()`, `file()`,
+`remote()` or `s3()` access. Anonymous visitors are Viewers, so a link can neither open
+Explore nor add a datasource that logs in as `otel`; run ad hoc queries with the SQL command
+above.
+
+The collector listens on 4327 rather than 4317 so it does not collide with an application's
+own OpenTelemetry collector.
+
 ## Where things live
 
 | Path | Contents |
@@ -29,6 +71,11 @@ Both listen on 127.0.0.1 only: mactop on port 2112, VictoriaMetrics on 8428.
 | `dashboards/mactop.json` | The vmui dashboard |
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
+| `compose.yaml` | The Claude telemetry stack |
+| `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
+| `clickhouse.xml`, `clickhouse-users.xml` | ClickHouse server settings and the read-only `grafana` user |
+| `schema.sql` | Claude telemetry retention and query views |
+| `grafana/` | Grafana datasource, dashboard provisioning, and the Claude usage dashboard |
 
 The two `result-*` links are Nix GC roots: `nix store gc` keeps both packages while the
 links exist.
@@ -59,3 +106,7 @@ without running them:
 
 `nix store gc` is optional. It frees the store paths sysmon used, and also anything else on
 this machine that no GC root holds.
+
+`bin/uninstall` leaves the Claude telemetry stack running. Stop it before removing the
+folder with `docker compose -f ~/code/sysmon/compose.yaml down`, and add `-v` only to delete
+every collected event with it.
