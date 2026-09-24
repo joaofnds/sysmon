@@ -59,7 +59,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "max": 100,
           "decimals": 0,
@@ -86,7 +85,8 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -133,7 +133,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "max": 100,
           "decimals": 0,
@@ -160,7 +159,8 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -207,7 +207,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "max": 100,
           "decimals": 0,
@@ -234,7 +233,8 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -268,7 +268,6 @@
         "w": 3,
         "h": 6
       },
-      "description": "macOS thermal pressure. Only Critical means heat is cutting the system's performance. Fair and Serious ask apps to cut back first.",
       "targets": [
         {
           "refId": "A",
@@ -276,7 +275,8 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "mactop_thermal_state"
+          "expr": "mactop_thermal_state",
+          "legendFormat": "Thermal state"
         }
       ],
       "fieldConfig": {
@@ -335,7 +335,8 @@
         "colorMode": "background",
         "textMode": "value",
         "justifyMode": "center"
-      }
+      },
+      "description": "macOS thermal pressure. Only Critical means heat is cutting the system's performance. Fair and Serious ask apps to cut back first."
     },
     {
       "id": 5,
@@ -364,12 +365,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "watt",
           "color": {
             "mode": "fixed",
             "fixedColor": "orange"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "watt"
         },
         "overrides": []
       },
@@ -416,12 +417,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "celsius",
           "color": {
             "mode": "fixed",
             "fixedColor": "red"
           },
-          "decimals": 0
+          "decimals": 0,
+          "unit": "celsius"
         },
         "overrides": []
       },
@@ -468,12 +469,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "color": {
             "mode": "fixed",
             "fixedColor": "purple"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "bytes"
         },
         "overrides": []
       },
@@ -520,12 +521,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "color": {
             "mode": "fixed",
             "fixedColor": "blue"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -572,12 +573,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "color": {
             "mode": "fixed",
             "fixedColor": "green"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -624,12 +625,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "color": {
             "mode": "fixed",
             "fixedColor": "yellow"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -676,12 +677,12 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "color": {
             "mode": "fixed",
             "fixedColor": "orange"
           },
-          "decimals": 1
+          "decimals": 1,
+          "unit": "Bps"
         },
         "overrides": []
       },
@@ -798,7 +799,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "max": 100,
           "decimals": 0,
@@ -825,7 +825,8 @@
           },
           "color": {
             "mode": "thresholds"
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -909,7 +910,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
@@ -920,7 +920,8 @@
             "axisSoftMin": 0,
             "lineInterpolation": "smooth"
           },
-          "min": 0
+          "min": 0,
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -1059,1446 +1060,6 @@
     {
       "id": 15,
       "type": "row",
-      "title": "CPU",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 102,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 16,
-      "type": "timeseries",
-      "title": "CPU usage",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 103,
-        "w": 9,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_cpu_usage_percent",
-          "legendFormat": "All cores"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_pcore_usage_percent",
-          "legendFormat": "Performance cores"
-        },
-        {
-          "refId": "C",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_score_usage_percent",
-          "legendFormat": "Super cores"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0,
-          "max": 100
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "All cores"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "blue"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Performance cores"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Super cores"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "purple"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "Super cores are the M5's highest-clocked cores. Performance cores take the rest of the work."
-    },
-    {
-      "id": 17,
-      "type": "bargauge",
-      "title": "Cores now",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 9,
-        "y": 103,
-        "w": 5,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "sort_by_label_numeric(mactop_cpu_core_usage_percent, \"core\")",
-          "legendFormat": "{{core}}",
-          "instant": true,
-          "range": false
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 60
-              },
-              {
-                "color": "orange",
-                "value": 80
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "color": {
-            "mode": "thresholds"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "orientation": "vertical",
-        "displayMode": "lcd",
-        "valueMode": "hidden",
-        "showUnfilled": true,
-        "namePlacement": "auto",
-        "sizing": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        }
-      },
-      "description": "Each core's usage in the latest sample. Cores 0 to 11 are performance cores, 12 to 17 super cores."
-    },
-    {
-      "id": 18,
-      "type": "state-timeline",
-      "title": "Cores over time",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 14,
-        "y": 103,
-        "w": 10,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "sort_by_label_numeric(mactop_cpu_core_usage_percent, \"core\")",
-          "legendFormat": "{{type}}{{core}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "min": 0,
-          "max": 100,
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "fillOpacity": 90,
-            "lineWidth": 0
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "showValue": "never",
-        "rowHeight": 0.9,
-        "mergeValues": false,
-        "alignValue": "left",
-        "legend": {
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "One lane per core. Green is idle, red is saturated. A lane that stays red means one thread is the bottleneck."
-    },
-    {
-      "id": 19,
-      "type": "row",
-      "title": "GPU and power",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 111,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 20,
-      "type": "timeseries",
-      "title": "GPU",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 112,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_gpu_usage_percent",
-          "legendFormat": "Usage"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_gpu_freq_mhz",
-          "legendFormat": "Frequency"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 20,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0,
-          "max": 100
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Usage"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "purple"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Frequency"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "rotmhz"
-              },
-              {
-                "id": "max",
-                "value": null
-              },
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 0
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "dash",
-                  "dash": [
-                    6,
-                    4
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 21,
-      "type": "timeseries",
-      "title": "Power",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 112,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "(mactop_power_watts{component=\"total\"} unless on() mactop_power_watts{component=\"system\"} == 0) - ignoring(component) (mactop_power_watts{component=\"gpu\"} unless on() mactop_power_watts{component=\"system\"} == 0)",
-          "legendFormat": "SoC and rest of system"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "(mactop_power_watts{component=\"gpu\"} unless on() mactop_power_watts{component=\"system\"} == 0)",
-          "legendFormat": "GPU"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "watt",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 35,
-            "gradientMode": "none",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth",
-            "stacking": {
-              "mode": "normal"
-            }
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "SoC and rest of system"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "GPU"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "purple"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "mactop 2.1.5 reads CPU, DRAM and Neural Engine power as zero on this M5 Pro, so the SoC's share cannot be split further. Samples where those readings spike past the whole-machine reading are left out."
-    },
-    {
-      "id": 22,
-      "type": "row",
-      "title": "Memory",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 120,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 23,
-      "type": "timeseries",
-      "title": "Memory",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 121,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_memory_gb{type=\"used\"} * 1073741824",
-          "legendFormat": "Used"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_memory_gb{type=\"total\"} * 1073741824",
-          "legendFormat": "Installed"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 25,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Used"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Installed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 0
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "dash",
-                  "dash": [
-                    6,
-                    4
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 24,
-      "type": "timeseries",
-      "title": "Swap",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 121,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_memory_gb{type=\"swap_used\"} * 1073741824",
-          "legendFormat": "Used"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_memory_gb{type=\"swap_total\"} * 1073741824",
-          "legendFormat": "Allocated"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 25,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Used"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "purple"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Allocated"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "text"
-                }
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 0
-              },
-              {
-                "id": "custom.lineStyle",
-                "value": {
-                  "fill": "dash",
-                  "dash": [
-                    6,
-                    4
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "macOS allocates swap files as it needs them, so Allocated rising means memory ran short at that moment."
-    },
-    {
-      "id": 25,
-      "type": "row",
-      "title": "Network and disk",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 129,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 26,
-      "type": "timeseries",
-      "title": "Network",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 130,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "(mactop_network_kbytes_per_sec{direction=\"download\"} < 1e7) * 1024",
-          "legendFormat": "Download"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "(mactop_network_kbytes_per_sec{direction=\"upload\"} < 1e7) * 1024",
-          "legendFormat": "Upload"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "Bps",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 30,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Download"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "blue"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Upload"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "Upload|Write"
-            },
-            "properties": [
-              {
-                "id": "custom.transform",
-                "value": "negative-Y"
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "Download above the line, upload below. Samples above 10 GB/s, faster than any link this Mac has, are mactop counter glitches and are left out."
-    },
-    {
-      "id": 27,
-      "type": "timeseries",
-      "title": "Disk throughput",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 130,
-        "w": 6,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_disk_kbytes_per_sec{operation=\"read\"} * 1024",
-          "legendFormat": "Read"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_disk_kbytes_per_sec{operation=\"write\"} * 1024",
-          "legendFormat": "Write"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "Bps",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 30,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Read"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "yellow"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Write"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "Upload|Write"
-            },
-            "properties": [
-              {
-                "id": "custom.transform",
-                "value": "negative-Y"
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "Read above the line, write below."
-    },
-    {
-      "id": 28,
-      "type": "timeseries",
-      "title": "Disk operations",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 130,
-        "w": 6,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_disk_iops{operation=\"read\"}",
-          "legendFormat": "Read"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_disk_iops{operation=\"write\"}",
-          "legendFormat": "Write"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "iops",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 30,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Read"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "yellow"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Write"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "Upload|Write"
-            },
-            "properties": [
-              {
-                "id": "custom.transform",
-                "value": "negative-Y"
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "Many operations with little throughput means small random I/O."
-    },
-    {
-      "id": 29,
-      "type": "row",
-      "title": "Thermals",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 138,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 30,
-      "type": "timeseries",
-      "title": "Hottest sensor by area",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 139,
-        "w": 12,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"CPU.*\"})",
-          "legendFormat": "CPU"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"GPU.*\"})",
-          "legendFormat": "GPU"
-        },
-        {
-          "refId": "C",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"SoC Package.*\"})",
-          "legendFormat": "SoC package"
-        },
-        {
-          "refId": "D",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"Memory.*\"})",
-          "legendFormat": "Memory"
-        },
-        {
-          "refId": "E",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"NVMe.*|NAND.*|SSD.*\"})",
-          "legendFormat": "Storage"
-        },
-        {
-          "refId": "F",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "max(mactop_temp_sensor_celsius{name=~\"Ambient.*\"})",
-          "legendFormat": "Ambient"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "celsius",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 0,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "description": "The hottest of each area's sensors."
-    },
-    {
-      "id": 31,
-      "type": "timeseries",
-      "title": "Fans",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 139,
-        "w": 6,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_fan_rpm",
-          "legendFormat": "{{fan_name}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "rotrpm",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 15,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 32,
-      "type": "state-timeline",
-      "title": "Thermal state",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 139,
-        "w": 6,
-        "h": 8
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_thermal_state",
-          "legendFormat": "Thermal state"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
-            {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "Nominal",
-                  "color": "green",
-                  "index": 0
-                },
-                "1": {
-                  "text": "Fair",
-                  "color": "yellow",
-                  "index": 1
-                },
-                "2": {
-                  "text": "Serious",
-                  "color": "orange",
-                  "index": 2
-                },
-                "3": {
-                  "text": "Critical",
-                  "color": "red",
-                  "index": 3
-                }
-              }
-            }
-          ],
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "custom": {
-            "fillOpacity": 85,
-            "lineWidth": 0
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "showValue": "never",
-        "rowHeight": 0.8,
-        "mergeValues": true,
-        "legend": {
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "description": "Any band other than green is time the Mac spent throttled."
-    },
-    {
-      "id": 33,
-      "type": "row",
-      "title": "Battery",
-      "collapsed": false,
-      "gridPos": {
-        "x": 0,
-        "y": 147,
-        "w": 24,
-        "h": 1
-      },
-      "panels": []
-    },
-    {
-      "id": 34,
-      "type": "timeseries",
-      "title": "Battery",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "victoriametrics"
-      },
-      "gridPos": {
-        "x": 0,
-        "y": 148,
-        "w": 24,
-        "h": 6
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_battery_percent",
-          "legendFormat": "Charge"
-        },
-        {
-          "refId": "B",
-          "datasource": {
-            "type": "prometheus",
-            "uid": "victoriametrics"
-          },
-          "expr": "mactop_battery_charging * 100",
-          "legendFormat": "Charging"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 20,
-            "gradientMode": "opacity",
-            "showPoints": "never",
-            "spanNulls": 30000,
-            "axisSoftMin": 0,
-            "lineInterpolation": "smooth"
-          },
-          "min": 0,
-          "max": 100
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Charge"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Charging"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "yellow"
-                }
-              },
-              {
-                "id": "custom.drawStyle",
-                "value": "bars"
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 15
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 0
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom",
-          "calcs": []
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 35,
-      "type": "row",
       "title": "Top apps now",
       "collapsed": false,
       "gridPos": {
@@ -2510,7 +1071,7 @@
       "panels": []
     },
     {
-      "id": 36,
+      "id": 16,
       "type": "table",
       "title": "CPU",
       "datasource": {
@@ -2532,14 +1093,13 @@
           },
           "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_cpu_seconds_total[1m])) * 100) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -2552,7 +1112,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -2585,7 +1146,6 @@
           }
         ]
       },
-      "description": "100% is one core fully busy, as in Activity Monitor.",
       "transformations": [
         {
           "id": "organize",
@@ -2599,10 +1159,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "100% is one core fully busy, as in Activity Monitor."
     },
     {
-      "id": 37,
+      "id": 17,
       "type": "table",
       "title": "Memory",
       "datasource": {
@@ -2624,14 +1185,13 @@
           },
           "expr": "sort_desc(topk(10, (sum by (app) (sysmon_process_resident_bytes)) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -2644,7 +1204,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "bytes"
         },
         "overrides": [
           {
@@ -2677,7 +1238,6 @@
           }
         ]
       },
-      "description": "Resident memory of each app's processes. Memory shared between processes counts once for each of them.",
       "transformations": [
         {
           "id": "organize",
@@ -2691,10 +1251,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Resident memory of each app's processes. Memory shared between processes counts once for each of them."
     },
     {
-      "id": 38,
+      "id": 18,
       "type": "table",
       "title": "Network",
       "datasource": {
@@ -2716,14 +1277,13 @@
           },
           "expr": "sort_desc(topk(10, (round(sum by (app) (rate(sysmon_process_network_received_bytes_total[1m]) + rate(sysmon_process_network_sent_bytes_total[1m])))) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -2736,7 +1296,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -2769,7 +1330,6 @@
           }
         ]
       },
-      "description": "Received plus sent, on external interfaces.",
       "transformations": [
         {
           "id": "organize",
@@ -2783,10 +1343,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Received plus sent, on external interfaces."
     },
     {
-      "id": 39,
+      "id": 19,
       "type": "table",
       "title": "Disk",
       "datasource": {
@@ -2808,14 +1369,13 @@
           },
           "expr": "sort_desc(topk(10, (round(sum by (app) (rate(sysmon_process_disk_read_bytes_total[1m]) + rate(sysmon_process_disk_written_bytes_total[1m])))) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -2828,7 +1388,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -2861,7 +1422,6 @@
           }
         ]
       },
-      "description": "Read plus written. Only processes running as you: macOS does not let other users read the counters of system daemons.",
       "transformations": [
         {
           "id": "organize",
@@ -2875,10 +1435,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Read plus written. Only processes running as you: macOS does not let other users read the counters of system daemons."
     },
     {
-      "id": 40,
+      "id": 20,
       "type": "table",
       "title": "GPU",
       "datasource": {
@@ -2900,14 +1461,13 @@
           },
           "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_gpu_seconds_total[1m])) * 100) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -2920,7 +1480,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -2953,7 +1514,6 @@
           }
         ]
       },
-      "description": "Share of GPU time.",
       "transformations": [
         {
           "id": "organize",
@@ -2967,10 +1527,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Share of GPU time."
     },
     {
-      "id": 41,
+      "id": 21,
       "type": "table",
       "title": "Energy",
       "datasource": {
@@ -2992,14 +1553,13 @@
           },
           "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_energy_joules_total[1m]))) > 0))",
           "legendFormat": "{{app}}",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "watt",
           "min": 0,
           "decimals": 1,
           "color": {
@@ -3012,7 +1572,8 @@
               "mode": "basic",
               "valueDisplayMode": "text"
             }
-          }
+          },
+          "unit": "watt"
         },
         "overrides": [
           {
@@ -3045,7 +1606,6 @@
           }
         ]
       },
-      "description": "macOS's own estimate of each app's power draw. Only processes running as you: macOS does not let other users read the counters of system daemons.",
       "transformations": [
         {
           "id": "organize",
@@ -3059,10 +1619,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "macOS's own estimate of each app's power draw. Only processes running as you: macOS does not let other users read the counters of system daemons."
     },
     {
-      "id": 42,
+      "id": 22,
       "type": "row",
       "title": "Apps over time",
       "collapsed": false,
@@ -3075,7 +1636,7 @@
       "panels": []
     },
     {
-      "id": 43,
+      "id": 23,
       "type": "timeseries",
       "title": "CPU by app",
       "datasource": {
@@ -3110,7 +1671,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3124,7 +1684,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -3194,7 +1755,7 @@
       "description": "100% is one core fully busy, as in Activity Monitor. The dashed line is all CPU time mactop measured, and the gap above the stack is mostly the kernel. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 44,
+      "id": 24,
       "type": "timeseries",
       "title": "Memory by app",
       "datasource": {
@@ -3220,7 +1781,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3234,7 +1794,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "bytes"
         },
         "overrides": [
           {
@@ -3304,7 +1865,7 @@
       "description": "Resident memory. Memory shared between processes counts once for each of them, so the stack is larger than the memory in use. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 45,
+      "id": 25,
       "type": "timeseries",
       "title": "Network by app",
       "datasource": {
@@ -3339,7 +1900,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3353,7 +1913,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -3423,7 +1984,7 @@
       "description": "Received plus sent on external interfaces. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 46,
+      "id": 26,
       "type": "timeseries",
       "title": "Disk by app",
       "datasource": {
@@ -3458,7 +2019,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3472,7 +2032,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -3542,7 +2103,7 @@
       "description": "Read plus written. The gap under the dashed line is system daemons. Only processes running as you: macOS does not let other users read the counters of system daemons. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 47,
+      "id": 27,
       "type": "timeseries",
       "title": "GPU by app",
       "datasource": {
@@ -3577,7 +2138,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3591,7 +2151,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -3661,7 +2222,7 @@
       "description": "Share of GPU time, from each app's GPU clients. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 48,
+      "id": 28,
       "type": "timeseries",
       "title": "Energy by app",
       "datasource": {
@@ -3687,7 +2248,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "watt",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -3701,7 +2261,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "watt"
         },
         "overrides": [
           {
@@ -3771,7 +2332,7 @@
       "description": "macOS's estimate of each app's power draw. It leaves out the display, the rest of the hardware and system daemons, which the Power chart above includes. Only processes running as you: macOS does not let other users read the counters of system daemons. Apps outside the 8 busiest over the time range are summed as Other."
     },
     {
-      "id": 49,
+      "id": 29,
       "type": "row",
       "title": "Inside $app",
       "collapsed": false,
@@ -3784,7 +2345,7 @@
       "panels": []
     },
     {
-      "id": 50,
+      "id": 30,
       "type": "table",
       "title": "Processes now",
       "datasource": {
@@ -3806,9 +2367,9 @@
           },
           "expr": "sum by (process) (sysmon_process_count{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "B",
@@ -3818,9 +2379,9 @@
           },
           "expr": "sum by (process) (rate(sysmon_process_cpu_seconds_total{app=\"$app\"}[1m])) * 100",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "C",
@@ -3830,9 +2391,9 @@
           },
           "expr": "sum by (process) (sysmon_process_resident_bytes{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "D",
@@ -3842,9 +2403,9 @@
           },
           "expr": "sum by (process) (sysmon_process_footprint_bytes{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "E",
@@ -3854,9 +2415,9 @@
           },
           "expr": "round(sum by (process) (rate(sysmon_process_network_received_bytes_total{app=\"$app\"}[1m]) + rate(sysmon_process_network_sent_bytes_total{app=\"$app\"}[1m])))",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "F",
@@ -3866,9 +2427,9 @@
           },
           "expr": "round(sum by (process) (rate(sysmon_process_disk_read_bytes_total{app=\"$app\"}[1m]) + rate(sysmon_process_disk_written_bytes_total{app=\"$app\"}[1m])))",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "G",
@@ -3878,9 +2439,9 @@
           },
           "expr": "sum by (process) (rate(sysmon_process_gpu_seconds_total{app=\"$app\"}[1m])) * 100",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "H",
@@ -3890,9 +2451,9 @@
           },
           "expr": "sum by (process) (rate(sysmon_process_energy_joules_total{app=\"$app\"}[1m]))",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "I",
@@ -3902,9 +2463,9 @@
           },
           "expr": "sum by (process) (rate(sysmon_process_idle_wakeups_total{app=\"$app\"}[1m]))",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "J",
@@ -3914,9 +2475,9 @@
           },
           "expr": "sum by (process) (sysmon_process_threads{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "K",
@@ -3926,9 +2487,9 @@
           },
           "expr": "sum by (process) (sysmon_process_open_files{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         },
         {
           "refId": "L",
@@ -3938,9 +2499,9 @@
           },
           "expr": "sum by (process) (sysmon_process_open_sockets{app=\"$app\"})",
           "legendFormat": "",
-          "format": "table",
           "instant": true,
-          "range": false
+          "range": false,
+          "format": "table"
         }
       ],
       "fieldConfig": {
@@ -4135,7 +2696,6 @@
           }
         ]
       },
-      "description": "Every process of the app, with what it used over the last minute and what it holds now. A blank cell has no reading behind it. macOS does not let this user read the footprint, disk, power, wakeups, threads, files or sockets of other users' processes, and network stays blank for a process that has held no external connection since sysmon started. Pick the app in the menu at the top.",
       "transformations": [
         {
           "id": "merge",
@@ -4163,10 +2723,11 @@
             }
           }
         }
-      ]
+      ],
+      "description": "Every process of the app, with what it used over the last minute and what it holds now. A blank cell has no reading behind it. macOS does not let this user read the footprint, disk, power, wakeups, threads, files or sockets of other users' processes, and network stays blank for a process that has held no external connection since sysmon started. Pick the app in the menu at the top."
     },
     {
-      "id": 51,
+      "id": 31,
       "type": "timeseries",
       "title": "CPU by process",
       "datasource": {
@@ -4192,7 +2753,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4206,7 +2766,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -4225,7 +2786,7 @@
       "description": "100% is one core fully busy, as in Activity Monitor. Pick the app in the menu at the top."
     },
     {
-      "id": 52,
+      "id": 32,
       "type": "timeseries",
       "title": "Resident memory by process",
       "datasource": {
@@ -4251,7 +2812,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4265,7 +2825,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "bytes"
         },
         "overrides": []
       },
@@ -4284,7 +2845,7 @@
       "description": "Memory in RAM. Memory shared between processes counts once for each of them. Pick the app in the menu at the top."
     },
     {
-      "id": 53,
+      "id": 33,
       "type": "timeseries",
       "title": "Footprint by process",
       "datasource": {
@@ -4310,7 +2871,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4324,7 +2884,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "bytes"
         },
         "overrides": []
       },
@@ -4343,7 +2904,7 @@
       "description": "What Activity Monitor shows as Memory: what the process alone is responsible for, compressed and swapped memory included, shared memory left out. A line that only climbs points at a leak. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 54,
+      "id": 34,
       "type": "timeseries",
       "title": "Network by process",
       "datasource": {
@@ -4378,7 +2939,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4388,7 +2948,8 @@
             "spanNulls": 30000,
             "axisSoftMin": 0,
             "lineInterpolation": "smooth"
-          }
+          },
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -4420,7 +2981,7 @@
       "description": "Received above the line, sent below it, on external interfaces. Pick the app in the menu at the top."
     },
     {
-      "id": 55,
+      "id": 35,
       "type": "timeseries",
       "title": "Disk by process",
       "datasource": {
@@ -4455,7 +3016,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "Bps",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4465,7 +3025,8 @@
             "spanNulls": 30000,
             "axisSoftMin": 0,
             "lineInterpolation": "smooth"
-          }
+          },
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -4497,7 +3058,7 @@
       "description": "Read above the line, written below it. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 56,
+      "id": 36,
       "type": "timeseries",
       "title": "GPU by process",
       "datasource": {
@@ -4523,7 +3084,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4537,7 +3097,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -4556,7 +3117,7 @@
       "description": "Share of GPU time. Pick the app in the menu at the top."
     },
     {
-      "id": 57,
+      "id": 37,
       "type": "timeseries",
       "title": "Power by process",
       "datasource": {
@@ -4582,7 +3143,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "watt",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4596,7 +3156,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "watt"
         },
         "overrides": []
       },
@@ -4615,7 +3176,7 @@
       "description": "macOS's estimate of each process's power draw. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 58,
+      "id": 38,
       "type": "timeseries",
       "title": "Idle wakeups by process",
       "datasource": {
@@ -4641,7 +3202,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "suffix:/s",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4655,7 +3215,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "suffix:/s"
         },
         "overrides": []
       },
@@ -4674,7 +3235,7 @@
       "description": "Times per second the process woke the CPU from idle. Frequent wakeups keep the chip out of its low-power states and cost battery even when CPU use looks low. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 59,
+      "id": 39,
       "type": "timeseries",
       "title": "Page-ins by process",
       "datasource": {
@@ -4700,7 +3261,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "suffix:pages/s",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4714,7 +3274,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "suffix:pages/s"
         },
         "overrides": []
       },
@@ -4733,7 +3294,7 @@
       "description": "Memory pages per second read in from disk because the process touched memory that was not in RAM, swapped out or in a mapped file. Steady page-ins while swap is in use mean the Mac is short of memory. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 60,
+      "id": 40,
       "type": "timeseries",
       "title": "Threads by process",
       "datasource": {
@@ -4759,7 +3320,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4773,7 +3333,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "none"
         },
         "overrides": []
       },
@@ -4792,7 +3353,7 @@
       "description": "A count that only climbs points at a thread leak. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 61,
+      "id": 41,
       "type": "timeseries",
       "title": "Open files by process",
       "datasource": {
@@ -4818,7 +3379,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4832,7 +3392,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "none"
         },
         "overrides": []
       },
@@ -4851,7 +3412,7 @@
       "description": "Files and directories held open. A count that only climbs points at a leaked file handle. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     },
     {
-      "id": 62,
+      "id": 42,
       "type": "timeseries",
       "title": "Sockets by process",
       "datasource": {
@@ -4877,7 +3438,6 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "none",
           "custom": {
             "drawStyle": "line",
             "lineWidth": 1,
@@ -4891,7 +3451,8 @@
               "mode": "normal"
             }
           },
-          "min": 0
+          "min": 0,
+          "unit": "none"
         },
         "overrides": []
       },
@@ -4908,6 +3469,1446 @@
         }
       },
       "description": "Network and local sockets held open. Many sockets with little traffic are idle connections kept open. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 43,
+      "type": "row",
+      "title": "CPU",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 102,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 44,
+      "type": "timeseries",
+      "title": "CPU usage",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 103,
+        "w": 9,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_cpu_usage_percent",
+          "legendFormat": "All cores"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_pcore_usage_percent",
+          "legendFormat": "Performance cores"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_score_usage_percent",
+          "legendFormat": "Super cores"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "All cores"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Performance cores"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Super cores"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Super cores are the M5's highest-clocked cores. Performance cores take the rest of the work."
+    },
+    {
+      "id": 45,
+      "type": "bargauge",
+      "title": "Cores now",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 9,
+        "y": 103,
+        "w": 5,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_by_label_numeric(mactop_cpu_core_usage_percent, \"core\")",
+          "legendFormat": "{{core}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "lcd",
+        "valueMode": "hidden",
+        "showUnfilled": true,
+        "namePlacement": "auto",
+        "sizing": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "description": "Each core's usage in the latest sample. Cores 0 to 11 are performance cores, 12 to 17 super cores."
+    },
+    {
+      "id": 46,
+      "type": "state-timeline",
+      "title": "Cores over time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 103,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_by_label_numeric(mactop_cpu_core_usage_percent, \"core\")",
+          "legendFormat": "{{type}}{{core}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "fillOpacity": 90,
+            "lineWidth": 0
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.9,
+        "mergeValues": false,
+        "alignValue": "left",
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "One lane per core. Green is idle, red is saturated. A lane that stays red means one thread is the bottleneck."
+    },
+    {
+      "id": 47,
+      "type": "row",
+      "title": "GPU and power",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 111,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 48,
+      "type": "timeseries",
+      "title": "GPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 112,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_gpu_usage_percent",
+          "legendFormat": "Usage"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_gpu_freq_mhz",
+          "legendFormat": "Frequency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Usage"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Frequency"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "rotmhz"
+              },
+              {
+                "id": "max",
+                "value": null
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 49,
+      "type": "timeseries",
+      "title": "Power",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 112,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "(mactop_power_watts{component=\"total\"} unless on() mactop_power_watts{component=\"system\"} == 0) - ignoring(component) (mactop_power_watts{component=\"gpu\"} unless on() mactop_power_watts{component=\"system\"} == 0)",
+          "legendFormat": "SoC and rest of system"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "(mactop_power_watts{component=\"gpu\"} unless on() mactop_power_watts{component=\"system\"} == 0)",
+          "legendFormat": "GPU"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 35,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "watt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SoC and rest of system"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "mactop 2.1.5 reads CPU, DRAM and Neural Engine power as zero on this M5 Pro, so the SoC's share cannot be split further. Samples where those readings spike past the whole-machine reading are left out."
+    },
+    {
+      "id": 50,
+      "type": "row",
+      "title": "Memory",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 120,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 51,
+      "type": "timeseries",
+      "title": "Memory",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 121,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_memory_gb{type=\"used\"} * 1073741824",
+          "legendFormat": "Used"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_memory_gb{type=\"total\"} * 1073741824",
+          "legendFormat": "Installed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "unit": "bytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Installed"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 52,
+      "type": "timeseries",
+      "title": "Swap",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 121,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_memory_gb{type=\"swap_used\"} * 1073741824",
+          "legendFormat": "Used"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_memory_gb{type=\"swap_total\"} * 1073741824",
+          "legendFormat": "Allocated"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "unit": "bytes"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Used"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Allocated"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "macOS allocates swap files as it needs them, so Allocated rising means memory ran short at that moment."
+    },
+    {
+      "id": 53,
+      "type": "row",
+      "title": "Network and disk",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 129,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 54,
+      "type": "timeseries",
+      "title": "Network",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 130,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "(mactop_network_kbytes_per_sec{direction=\"download\"} < 1e7) * 1024",
+          "legendFormat": "Download"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "(mactop_network_kbytes_per_sec{direction=\"upload\"} < 1e7) * 1024",
+          "legendFormat": "Upload"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "unit": "Bps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Download"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Upload"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Upload|Write"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Download above the line, upload below. Samples above 10 GB/s, faster than any link this Mac has, are mactop counter glitches and are left out."
+    },
+    {
+      "id": 55,
+      "type": "timeseries",
+      "title": "Disk throughput",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 130,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_disk_kbytes_per_sec{operation=\"read\"} * 1024",
+          "legendFormat": "Read"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_disk_kbytes_per_sec{operation=\"write\"} * 1024",
+          "legendFormat": "Write"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "unit": "Bps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Read"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Write"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Upload|Write"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Read above the line, write below."
+    },
+    {
+      "id": 56,
+      "type": "timeseries",
+      "title": "Disk operations",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 130,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_disk_iops{operation=\"read\"}",
+          "legendFormat": "Read"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_disk_iops{operation=\"write\"}",
+          "legendFormat": "Write"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "unit": "iops"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Read"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Write"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Upload|Write"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Many operations with little throughput means small random I/O."
+    },
+    {
+      "id": 57,
+      "type": "row",
+      "title": "Thermals",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 138,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 58,
+      "type": "timeseries",
+      "title": "Hottest sensor by area",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 139,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"CPU.*\"})",
+          "legendFormat": "CPU"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"GPU.*\"})",
+          "legendFormat": "GPU"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"SoC Package.*\"})",
+          "legendFormat": "SoC package"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"Memory.*\"})",
+          "legendFormat": "Memory"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"NVMe.*|NAND.*|SSD.*\"})",
+          "legendFormat": "Storage"
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "max(mactop_temp_sensor_celsius{name=~\"Ambient.*\"})",
+          "legendFormat": "Ambient"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "The hottest of each area's sensors."
+    },
+    {
+      "id": 59,
+      "type": "timeseries",
+      "title": "Fans",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 139,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_fan_rpm",
+          "legendFormat": "{{fan_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "unit": "rotrpm"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 60,
+      "type": "state-timeline",
+      "title": "Thermal state",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 139,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_thermal_state",
+          "legendFormat": "Thermal state"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Nominal",
+                  "color": "green",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Fair",
+                  "color": "yellow",
+                  "index": 1
+                },
+                "2": {
+                  "text": "Serious",
+                  "color": "orange",
+                  "index": 2
+                },
+                "3": {
+                  "text": "Critical",
+                  "color": "red",
+                  "index": 3
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.8,
+        "mergeValues": true,
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "description": "Any band other than green is time the Mac spent throttled."
+    },
+    {
+      "id": 61,
+      "type": "row",
+      "title": "Battery",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 147,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 62,
+      "type": "timeseries",
+      "title": "Battery",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 148,
+        "w": 24,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_battery_percent",
+          "legendFormat": "Charge"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_battery_charging * 100",
+          "legendFormat": "Charging"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          },
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Charge"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Charging"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 15
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
     }
   ]
 }

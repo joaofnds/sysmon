@@ -35,6 +35,13 @@ sockets, and the charts below it follow each of those per process over time, wit
 page-ins. Footprint is the memory figure Activity Monitor shows. A blank cell has no
 reading behind it. The app picker starts on the app using the most memory.
 
+`grafana/mac-system.py` writes this dashboard's JSON, so change the script rather than the
+JSON, then run it:
+
+    nix shell nixpkgs#python3 -c python3 grafana/mac-system.py
+
+Grafana picks up the rewritten file on its own.
+
 An app is the outermost `.app` bundle a process runs from, so Brave's helpers count as
 Brave Browser. Processes outside any bundle group by executable name. Its limits:
 
@@ -126,6 +133,7 @@ collector.
 | `clickhouse.xml`, `clickhouse-users.xml` | ClickHouse server settings and the read-only `grafana` user |
 | `schema.sql` | Claude telemetry retention and query views |
 | `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
+| `grafana/mac-system.py` | The script that writes the Mac system dashboard |
 
 The `result-*` links are Nix GC roots: `nix store gc` keeps the packages while the links
 exist.
