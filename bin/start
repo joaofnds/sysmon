@@ -53,7 +53,7 @@ interval=$(awk '$1 == "scrape_interval:" { print $2; exit }' scrape.yml)
 case $interval in
   "" | s | *[!s] | *[!0-9]*s) echo "start: scrape_interval must be whole seconds like 10s, got '$interval'" >&2; exit 1 ;;
 esac
-seconds=${interval%s}
+interval_seconds=${interval%s}
 
 nix build .#mactop --out-link result-mactop
 nix build .#sysmon-procs --out-link result-sysmon-procs
@@ -61,17 +61,17 @@ nix build .#claude-limits --out-link result-claude-limits
 nix build .#victoriametrics --out-link result-victoriametrics
 private_dir data logs run
 
-nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((seconds * 1000))" \
+nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((interval_seconds * 1000))" \
   >/dev/null 2>>logs/mactop.log &
 echo $! >run/mactop.pid
 echo "mactop started (pid $!), waiting for its first sample"
-wait_until mactop $((seconds * 3 + 30)) mactop_has_sample
+wait_until mactop $((interval_seconds * 3 + 30)) mactop_has_sample
 
 nohup ./result-sysmon-procs/bin/sysmon-procs -listen "$PROCS_ADDR" -interval "$interval" \
   >/dev/null 2>>logs/sysmon-procs.log &
 echo $! >run/sysmon-procs.pid
 echo "sysmon-procs started (pid $!), waiting for its first sample"
-wait_until sysmon-procs $((seconds + 30)) procs_has_sample
+wait_until sysmon-procs $((interval_seconds + 30)) procs_has_sample
 
 nohup ./result-claude-limits/bin/claude-limits -listen "$LIMITS_ADDR" \
   >/dev/null 2>>logs/claude-limits.log &
