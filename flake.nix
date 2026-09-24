@@ -1,5 +1,5 @@
 {
-  description = "Local Mac system monitoring: mactop and per-app usage scraped by VictoriaMetrics";
+  description = "Local Mac system monitoring: mactop, per-app usage and Claude plan limits scraped by VictoriaMetrics";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -20,15 +20,22 @@
         src = ./procs;
         vendorHash = null;
       };
+
+      claude-limits = pkgs.buildGoModule {
+        pname = "claude-limits";
+        version = "0";
+        src = ./claude-limits;
+        vendorHash = null;
+      };
     in
     {
       packages.aarch64-darwin = {
-        inherit mactop sysmon-procs;
+        inherit mactop sysmon-procs claude-limits;
         inherit (pkgs) victoriametrics;
       };
 
       devShells.aarch64-darwin.default = pkgs.mkShellNoCC {
-        packages = [ mactop sysmon-procs pkgs.victoriametrics pkgs.go ];
+        packages = [ mactop sysmon-procs claude-limits pkgs.victoriametrics pkgs.go ];
       };
     };
 }

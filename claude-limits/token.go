@@ -1,0 +1,24 @@
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+)
+
+var errNoAccessToken = errors.New("no Claude.ai login in Claude Code's credentials")
+
+func accessToken(item []byte) (string, error) {
+	var credentials struct {
+		ClaudeAIOAuth *struct {
+			AccessToken string `json:"accessToken"`
+		} `json:"claudeAiOauth"`
+	}
+	if err := json.Unmarshal(item, &credentials); err != nil {
+		return "", fmt.Errorf("reading Claude Code's credentials: %w", err)
+	}
+	if credentials.ClaudeAIOAuth == nil || credentials.ClaudeAIOAuth.AccessToken == "" {
+		return "", errNoAccessToken
+	}
+	return credentials.ClaudeAIOAuth.AccessToken, nil
+}
