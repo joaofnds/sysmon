@@ -2,3 +2,6 @@ data/
 logs/
 run/
 result-*
+clickhouse-data/
+grafana-data/
+clickhouse/*-preprocessed.xml

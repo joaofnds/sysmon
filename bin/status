@@ -2,10 +2,12 @@
 set -u
 . "$(dirname "$0")/../lib.sh"
 
-for svc in mactop sysmon-procs claude-limits victoria-metrics; do
-  if pid=$(pid_of "$svc"); then
+for svc in mactop sysmon-procs claude-limits victoria-metrics $TELEMETRY_AGENTS grafana; do
+  if pid=$(pid_of "$svc") || pid=$(agent_pid "$svc"); then
     ps -p "$pid" -o %cpu=,rss= |
       awk -v svc="$svc" -v pid="$pid" '{ printf "%-17s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
+  elif ! agent_gone "$svc"; then
+    printf '%-17s loaded but not running, see logs/%s.log\n' "$svc" "$svc"
   else
     printf '%-17s stopped\n' "$svc"
   fi
@@ -23,5 +25,6 @@ if [ -d data ]; then
   echo "data size         $(du -sh data | cut -f1)"
 fi
 
-docker compose ps --all --format '{{.Service}} {{.State}}' 2>/dev/null |
-  awk '$1 != "schema" { printf "%-17s %s\n", $1, $2; n++ } END { if (!n) print "telemetry stack   not running" }'
+if [ -d clickhouse-data ]; then
+  echo "telemetry size    $(du -sh clickhouse-data | cut -f1)"
+fi

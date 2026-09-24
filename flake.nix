@@ -1,5 +1,5 @@
 {
-  description = "Local Mac system monitoring: mactop, per-app usage and Claude plan limits scraped by VictoriaMetrics";
+  description = "Local Mac system monitoring: mactop, per-app usage and Claude plan limits scraped by VictoriaMetrics, and Claude Code telemetry in ClickHouse";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -27,11 +27,26 @@
         src = ./claude-limits;
         vendorHash = null;
       };
+
+      grafana = pkgs.fetchzip {
+        name = "grafana-13.2.2";
+        url = "https://dl.grafana.com/oss/release/grafana-13.2.2.darwin-arm64.tar.gz";
+        hash = "sha256-DgGUmZOUaDOUmkjdgVLVSwjkLZP0S8SAAdghbZsHHKg=";
+      };
+
+      grafana-plugins = pkgs.fetchzip {
+        name = "grafana-clickhouse-datasource-4.21.3";
+        url = "https://grafana.com/api/plugins/grafana-clickhouse-datasource/versions/4.21.3/download?os=darwin&arch=arm64";
+        extension = "zip";
+        stripRoot = false;
+        hash = "sha256-KIIWaR5gfv6M4VlaMtLeWd8YJMUBys1SuMZ+KUHhrYs=";
+      };
     in
     {
       packages.aarch64-darwin = {
-        inherit mactop sysmon-procs claude-limits;
-        inherit (pkgs) victoriametrics;
+        inherit mactop sysmon-procs claude-limits grafana grafana-plugins;
+        inherit (pkgs) victoriametrics clickhouse;
+        otelcol-contrib = pkgs.opentelemetry-collector-contrib;
       };
 
       devShells.aarch64-darwin.default = pkgs.mkShellNoCC {

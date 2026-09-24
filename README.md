@@ -10,22 +10,24 @@ all three, and Grafana charts them.
 Nix provides all four programs, pinned by `flake.lock`. None is installed system-wide, and
 they run only between `bin/start` and `bin/stop`.
 
-Beside them, a Docker Compose stack records Claude Code's telemetry in ClickHouse and charts
-it in Grafana. That stack does start on its own, with OrbStack. See Claude telemetry below.
+Beside them, an OpenTelemetry collector records Claude Code's telemetry in ClickHouse. Those
+two run under launchd and start again at login. Grafana charts both kinds of data and runs
+only while `bin/grafana` does. Nix pins these three as well. See Claude telemetry below.
 
 ## Use
 
     bin/start     # starts mactop and sysmon-procs, waits for their first samples,
                   # then claude-limits and VictoriaMetrics
-    bin/status    # running or not, PIDs, CPU% and RSS, the health of each scrape target,
-                  # data size, and the state of each Claude telemetry container
+    bin/status    # running or not, PIDs, CPU% and RSS of every service, the health of
+                  # each scrape target, and the size of the metrics and telemetry data
     bin/stop      # stops all four and removes their PID files
+    bin/grafana   # serves the dashboards until Ctrl-C and opens them in the browser
 
-Dashboard: http://localhost:3030/d/mac-system. It is served by the Grafana of the Claude
-telemetry stack below, which reads VictoriaMetrics through `host.docker.internal:8428`, so
-it shows data only while `bin/start` is running. Hover any chart and every other chart
-marks the same moment, which lines up a load spike with the power, heat and fan speed it
-caused. For ad hoc queries, VictoriaMetrics has its own UI at http://127.0.0.1:8428/vmui.
+Dashboard: http://localhost:3030/d/mac-system, while `bin/grafana` runs. It reads
+VictoriaMetrics, so it shows data only while `bin/start` is running. Hover any chart and
+every other chart marks the same moment, which lines up a load spike with the power, heat
+and fan speed it caused. For ad hoc queries, VictoriaMetrics has its own UI at
+http://127.0.0.1:8428/vmui.
 
 The top of the dashboard is the whole machine. Below it, Top apps now ranks apps by CPU,
 memory, network, disk, GPU and energy over the last minute, Apps over time stacks the eight
@@ -97,50 +99,60 @@ leave a gap rather than repeat an old reading, and `logs/claude-limits.log` says
 
 ## Claude telemetry
 
-A Docker Compose stack stores Claude Code's OpenTelemetry events in ClickHouse and charts
-them in Grafana, so token spend can be broken down by model, subagent, skill, MCP server,
+An OpenTelemetry collector stores Claude Code's OpenTelemetry events in ClickHouse, and
+Grafana charts them, so token spend can be broken down by model, subagent, skill, MCP server,
 repository, session, prompt, and tool. Claude Code exports to it through the `OTEL_*`
 entries in `~/.claude/settings.json`. chezmoi renders that file from
 `dot_claude/private_settings.json` in the dotfiles repository, so change them there.
 
-Unlike mactop and VictoriaMetrics, it runs in OrbStack and restarts with it. Start it once:
+    bin/telemetry-on    # starts ClickHouse and the collector under launchd, waits for the
+                        # events table, and applies schema.sql
+    bin/telemetry-off   # stops both and removes their launchd agents
 
-    docker compose -f ~/code/sysmon/compose.yaml up -d
+Unlike mactop and VictoriaMetrics, the collector and ClickHouse keep running once started:
+launchd restarts either one when it exits and starts both at login, until
+`bin/telemetry-off`. Their agents are `sysmon.clickhouse` and `sysmon.otelcol` in
+`~/Library/LaunchAgents`, and they log to `logs/clickhouse.log` and `logs/otelcol.log`. At
+login the collector can start before ClickHouse accepts connections. It then exits, and
+launchd starts it again every ten seconds until ClickHouse does. Rerun `bin/telemetry-on`
+after editing `otelcol.yaml`, `clickhouse/` or `schema.sql`, because the services read their
+files only when they start.
 
-`bin/status` reports its containers too.
+Grafana runs only while `bin/grafana` does, and opens http://localhost:3030 once it answers.
+Its own state lives in `grafana-data/`, and its datasources and dashboards come from
+`grafana/`. The flake pins Grafana's official darwin-arm64 build and the ClickHouse
+datasource plugin by hash, so starting it compiles nothing and installs no plugin.
+Grafana runs each datasource plugin as a process of its own, so `bin/grafana` turns off the
+ones it bundles that no dashboard uses, through `GF_PLUGINS_DISABLE_PLUGINS`. Take a plugin
+off that list before adding a datasource of its kind.
 
-Rerun it with `--force-recreate` after editing any of its files. The services read their
-files only when they start, `up -d` alone leaves a running container as it is, and the
-`schema` service reapplies `schema.sql` on every start.
+The collected events live in `clickhouse-data/`. To query them:
 
-The collected events live in the Docker volumes `claude-telemetry_clickhouse` and
-`claude-telemetry_grafana`. `compose.yaml` names them outright, so renaming the Compose
-project or moving this folder keeps them.
+    ~/code/sysmon/result-clickhouse/bin/clickhouse client --port 9327 -u otel --password otel -d otel
 
-`clickhouse.xml` turns off ClickHouse's own system log tables, which otherwise double its
-idle CPU and memory. It lists every log section active in the pinned image's `config.xml`
-except `crash_log`, which is written only on a fatal error, so recheck it when bumping the
-image.
-
-- Dashboard: http://localhost:3030
-- SQL: `docker compose -f ~/code/sysmon/compose.yaml exec clickhouse clickhouse-client -u otel --password otel -d otel`
+`clickhouse/config.xml` is a complete ClickHouse config rather than an override of a stock
+one, so it configures none of ClickHouse's own system log tables, which in the stock config
+double its idle CPU and memory.
 
 `schema.sql` defines the views to query (`api_requests`, `prompts`, `tool_results`,
 `subagent_runs`, `session_first_prompts`) and keeps 90 days of events. To change that, edit
-`INTERVAL 90 DAY` on its first line and rerun with `--force-recreate`. `api_requests`
+`INTERVAL 90 DAY` on its first line and rerun `bin/telemetry-on`. `api_requests`
 splits each request's cost into input, cache reads, cache writes and output using the
 per-model prices in `model_prices`. A request whose model is missing from that list, or
 that ran at a speed other than normal, shows all its spend as "Other" on the dashboard.
 
-ClickHouse publishes no port to the host, because its HTTP interface answers any web page;
-reach it through Grafana or `docker compose exec`. Grafana connects as the `grafana` user
-from `clickhouse-users.xml`, which may only select from the `otel` database. A Grafana link
-runs its query when opened, so that user must not gain writes or `url()`, `file()`,
-`remote()` or `s3()` access. Anonymous visitors are Viewers, so a link can neither open
-Explore nor add a datasource that logs in as `otel`; run ad hoc queries with the SQL command
-above.
+ClickHouse opens no HTTP port, because its HTTP interface answers any web page. It speaks
+only its native protocol, on 127.0.0.1:9327, and has no `default` user. The collector
+connects as `otel`, which may reach only the `otel` database and `scratch`, a database for
+ad hoc tables, and has no `url()`, `file()`, `remote()` or `s3()` access. Grafana connects
+as the `grafana` user from `clickhouse/users.xml`, which may only select from the `otel`
+database. A Grafana link runs its query when opened, so that user must not gain writes or
+`url()`, `file()`, `remote()` or `s3()` access. Grafana has no login, since `bin/grafana`
+turns off its login form and basic auth, so every visitor is an anonymous Viewer, who can
+neither open Explore nor add a datasource that logs in as `otel`. Run ad hoc queries with
+the command above.
 
-Grafana and the collector publish their ports on 127.0.0.1 only. The collector listens on
+Grafana, the collector and ClickHouse listen on 127.0.0.1 only. The collector listens on
 4327 rather than 4317 so it does not collide with an application's own OpenTelemetry
 collector.
 
@@ -149,16 +161,19 @@ collector.
 | Path | Contents |
 |---|---|
 | `data/` | VictoriaMetrics storage |
-| `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics |
+| `clickhouse-data/` | ClickHouse storage, holding the Claude telemetry events |
+| `grafana-data/` | Grafana's own database |
+| `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics, and the output of ClickHouse and the collector. Grafana logs to the terminal running `bin/grafana` |
 | `run/` | PID files |
 | `result-mactop`, `result-sysmon-procs`, `result-claude-limits`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
+| `result-clickhouse`, `result-otelcol-contrib` | Links to the Nix store paths `bin/telemetry-on` runs |
+| `result-grafana`, `result-grafana-plugins` | Links to the Grafana build and its ClickHouse plugin, which `bin/grafana` runs |
 | `procs/` | Source of `sysmon-procs`, the per-app collector |
 | `claude-limits/` | Source of `claude-limits`, the Claude plan limits collector |
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
-| `compose.yaml` | The Claude telemetry stack |
 | `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
-| `clickhouse.xml`, `clickhouse-users.xml` | ClickHouse server settings and the read-only `grafana` user |
+| `clickhouse/` | ClickHouse server settings, and its users: `otel` for the collector and the read-only `grafana` |
 | `schema.sql` | Claude telemetry retention and query views |
 | `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
 | `grafana/mac-system.py` | The script that writes the Mac system dashboard |
@@ -186,15 +201,13 @@ its first sample, so a longer interval makes `bin/start` wait longer.
 
     bin/uninstall
 
-It asks for confirmation, stops mactop, sysmon-procs, claude-limits and VictoriaMetrics,
-removes the Claude telemetry containers, and prints the commands that finish the job,
-without running them:
+It asks for confirmation, stops every service, removes the launchd agents of ClickHouse and
+the collector, and prints the commands that finish the job, without running them:
 
     rm -rf ~/code/sysmon
     nix store gc
-    docker volume rm claude-telemetry_clickhouse claude-telemetry_grafana
 
-The last one deletes every collected Claude telemetry event, so skip it to keep them.
+The first one deletes the metrics and every collected Claude telemetry event.
 
 `nix store gc` is optional. It frees the store paths sysmon used, and also anything else on
 this machine that no GC root holds.

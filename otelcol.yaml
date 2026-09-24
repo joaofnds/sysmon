@@ -2,17 +2,20 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317
+        endpoint: 127.0.0.1:4327
 
 exporters:
   clickhouse:
-    endpoint: tcp://clickhouse:9000
+    endpoint: tcp://127.0.0.1:9327
     database: otel
     username: otel
     password: otel
     create_schema: true
 
 service:
+  telemetry:
+    metrics:
+      level: none
   pipelines:
     logs:
       receivers: [otlp]

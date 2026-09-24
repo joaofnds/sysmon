@@ -1,0 +1,51 @@
+#!/bin/sh
+set -eu
+. "$(dirname "$0")/../lib.sh"
+
+URL=http://localhost:3030
+
+if pid=$(pid_of grafana); then
+  echo "grafana is already running (pid $pid)"
+  open "$URL"
+  exit 0
+fi
+
+nix build .#grafana --out-link result-grafana
+nix build .#grafana-plugins --out-link result-grafana-plugins
+mkdir -p grafana-data logs run grafana/provisioning/plugins grafana/provisioning/alerting
+
+(
+  for _ in $(seq 60); do
+    kill -0 "$$" 2>/dev/null || exit 0
+    if curl -sf --max-time 2 "$URL/api/health" >/dev/null; then
+      open "$URL"
+      exit 0
+    fi
+    sleep 1
+  done
+  echo "grafana: not ready in 60s" >&2
+) &
+
+echo $$ >run/grafana.pid
+echo "grafana starting at $URL, Ctrl-C stops it"
+exec env \
+  GF_PATHS_DATA="$ROOT/grafana-data" \
+  GF_PATHS_LOGS="$ROOT/logs" \
+  GF_PATHS_PLUGINS="$ROOT/result-grafana-plugins" \
+  GF_PATHS_PROVISIONING="$ROOT/grafana/provisioning" \
+  GF_PLUGINS_PREINSTALL_DISABLED=true \
+  GF_PLUGINS_DISABLE_PLUGINS=elasticsearch,grafana-postgresql-datasource,grafana-pyroscope-datasource,influxdb,jaeger,loki,mssql,mysql,opentsdb,stackdriver,tempo,zipkin \
+  GF_LOG_MODE=console \
+  GF_LOG_LEVEL=warn \
+  GF_AUTH_ANONYMOUS_ENABLED=true \
+  GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer \
+  GF_AUTH_DISABLE_LOGIN_FORM=true \
+  GF_AUTH_DISABLE_LOGIN=true \
+  GF_AUTH_BASIC_ENABLED=false \
+  GF_SERVER_HTTP_ADDR=127.0.0.1 \
+  GF_SERVER_HTTP_PORT=3030 \
+  GF_SERVER_DOMAIN=localhost \
+  GF_SERVER_ENFORCE_DOMAIN=true \
+  GF_SERVER_ROOT_URL="$URL/" \
+  GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH="$ROOT/grafana/dashboards/claude-usage.json" \
+  ./result-grafana/bin/grafana server --homepath "$ROOT/result-grafana"

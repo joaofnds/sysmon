@@ -87,4 +87,4 @@ nohup ./result-victoriametrics/bin/victoria-metrics \
   >>logs/victoria-metrics.log 2>&1 &
 echo $! >run/victoria-metrics.pid
 wait_until victoria-metrics 30 vm_healthy
-echo "victoria-metrics started (pid $!), dashboard at http://localhost:3030/d/mac-system"
+echo "victoria-metrics started (pid $!), bin/grafana shows the dashboards"

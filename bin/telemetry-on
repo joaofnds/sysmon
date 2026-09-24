@@ -1,0 +1,103 @@
+#!/bin/sh
+set -eu
+. "$(dirname "$0")/../lib.sh"
+
+CLICKHOUSE=$ROOT/result-clickhouse/bin/clickhouse
+
+fail() {
+  echo "telemetry-on: $*" >&2
+  bin/telemetry-off >&2
+  exit 1
+}
+
+query() {
+  "$CLICKHOUSE" client --port 9327 -u otel --password otel "$@"
+}
+
+wait_until() {
+  what=$1 deadline=$(($(date +%s) + $2))
+  shift 2
+  while ! "$@"; do
+    [ "$(date +%s)" -lt "$deadline" ] || fail "timed out waiting for $what, see logs/"
+    sleep 1
+  done
+}
+
+probe() {
+  query --connect_timeout=2 --receive_timeout=2 -q "$1" 2>/dev/null
+}
+
+clickhouse_ready() {
+  probe 'SELECT 1' >/dev/null
+}
+
+logs_table_exists() {
+  [ "$(probe 'EXISTS TABLE otel.otel_logs')" = 1 ]
+}
+
+write_agent() {
+  name=$1
+  shift
+  {
+    cat <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>sysmon.$name</string>
+  <key>ProgramArguments</key>
+  <array>
+EOF
+    for arg; do
+      printf '    <string>%s</string>\n' "$arg"
+    done
+    cat <<EOF
+  </array>
+  <key>WorkingDirectory</key>
+  <string>$ROOT</string>
+  <key>StandardOutPath</key>
+  <string>$ROOT/logs/$name.log</string>
+  <key>StandardErrorPath</key>
+  <string>$ROOT/logs/$name.log</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ExitTimeOut</key>
+  <integer>30</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
+EOF
+  } >"$LAUNCH_AGENTS/sysmon.$name.plist"
+}
+
+nix build .#clickhouse --out-link result-clickhouse
+nix build .#otelcol-contrib --out-link result-otelcol-contrib
+mkdir -p clickhouse-data logs "$LAUNCH_AGENTS"
+
+for name in $TELEMETRY_AGENTS; do
+  launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name" 2>/dev/null || true
+  wait_until "sysmon.$name to unload" 30 agent_gone "$name"
+done
+
+# Without the watchdog variable, ClickHouse forks and launchd supervises the watchdog.
+write_agent clickhouse /usr/bin/env CLICKHOUSE_WATCHDOG_ENABLE=0 "$CLICKHOUSE" server \
+  --config-file="$ROOT/clickhouse/config.xml" -- --path="$ROOT/clickhouse-data/"
+write_agent otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
+  --config="$ROOT/otelcol.yaml"
+
+launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.clickhouse.plist" ||
+  fail "launchd refused sysmon.clickhouse"
+wait_until clickhouse 60 clickhouse_ready
+echo "clickhouse started (pid $(agent_pid clickhouse))"
+
+launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.otelcol.plist" ||
+  fail "launchd refused sysmon.otelcol"
+wait_until otelcol 60 logs_table_exists
+echo "otelcol started (pid $(agent_pid otelcol))"
+
+query --multiquery --queries-file schema.sql
+echo "schema.sql applied. Both start at login until bin/telemetry-off."

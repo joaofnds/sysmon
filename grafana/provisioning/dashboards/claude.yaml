@@ -4,4 +4,4 @@ providers:
   - name: claude
     type: file
     options:
-      path: /etc/grafana/dashboards
+      path: grafana/dashboards

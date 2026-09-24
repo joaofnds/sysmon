@@ -1,0 +1,25 @@
+#!/bin/sh
+set -u
+. "$(dirname "$0")/../lib.sh"
+
+status=0
+for name in $TELEMETRY_AGENTS; do
+  if agent_gone "$name"; then
+    echo "$name not running"
+  else
+    launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name"
+    seconds=60
+    while ! agent_gone "$name" && [ "$seconds" -gt 0 ]; do
+      sleep 1
+      seconds=$((seconds - 1))
+    done
+    if agent_gone "$name"; then
+      echo "$name stopped"
+    else
+      echo "$name still loaded after 60s, see logs/$name.log" >&2
+      status=1
+    fi
+  fi
+  rm -f "$LAUNCH_AGENTS/sysmon.$name.plist"
+done
+exit "$status"
