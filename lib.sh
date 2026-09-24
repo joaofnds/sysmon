@@ -84,6 +84,7 @@ EOF
 
 stop_agent() {
   dir=$1 name=$2
+
   rm -f "$dir/sysmon.$name.plist"
   if agent_gone "$name"; then
     echo "$name not running"
