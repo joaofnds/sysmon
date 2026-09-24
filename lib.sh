@@ -41,3 +41,64 @@ agent_pid() {
 agent_gone() {
   ! launchctl print "$LAUNCHD_DOMAIN/sysmon.$1" >/dev/null 2>&1
 }
+
+write_agent() {
+  dir=$1 name=$2
+  shift 2
+  {
+    cat <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>sysmon.$name</string>
+  <key>ProgramArguments</key>
+  <array>
+EOF
+    for arg; do
+      printf '    <string>%s</string>\n' "$arg"
+    done
+    cat <<EOF
+  </array>
+  <key>WorkingDirectory</key>
+  <string>$ROOT</string>
+  <key>StandardOutPath</key>
+  <string>$ROOT/logs/$name.log</string>
+  <key>StandardErrorPath</key>
+  <string>$ROOT/logs/$name.log</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ExitTimeOut</key>
+  <integer>30</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
+EOF
+  } >"$dir/sysmon.$name.plist"
+}
+
+stop_agent() {
+  dir=$1 name=$2
+  rm -f "$dir/sysmon.$name.plist"
+  if agent_gone "$name"; then
+    echo "$name not running"
+    return 0
+  fi
+
+  launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name"
+  seconds=60
+  while ! agent_gone "$name" && [ "$seconds" -gt 0 ]; do
+    sleep 1
+    seconds=$((seconds - 1))
+  done
+
+  if ! agent_gone "$name"; then
+    echo "$name still loaded after 60s, see logs/$name.log" >&2
+    return 1
+  fi
+  echo "$name stopped"
+}

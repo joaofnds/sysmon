@@ -35,45 +35,6 @@ logs_table_exists() {
   [ "$(probe 'EXISTS TABLE otel.otel_logs')" = 1 ]
 }
 
-write_agent() {
-  name=$1
-  shift
-  {
-    cat <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>sysmon.$name</string>
-  <key>ProgramArguments</key>
-  <array>
-EOF
-    for arg; do
-      printf '    <string>%s</string>\n' "$arg"
-    done
-    cat <<EOF
-  </array>
-  <key>WorkingDirectory</key>
-  <string>$ROOT</string>
-  <key>StandardOutPath</key>
-  <string>$ROOT/logs/$name.log</string>
-  <key>StandardErrorPath</key>
-  <string>$ROOT/logs/$name.log</string>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-  <key>ExitTimeOut</key>
-  <integer>30</integer>
-  <key>ProcessType</key>
-  <string>Background</string>
-</dict>
-</plist>
-EOF
-  } >"$LAUNCH_AGENTS/sysmon.$name.plist"
-}
-
 nix build .#clickhouse --out-link result-clickhouse
 nix build .#otelcol-contrib --out-link result-otelcol-contrib
 private_dir clickhouse-data logs
@@ -85,8 +46,8 @@ for name in $TELEMETRY_AGENTS; do
   wait_until "sysmon.$name to unload" 30 agent_gone "$name"
 done
 
-write_agent clickhouse "$ROOT/clickhouse/server"
-write_agent otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
+write_agent "$LAUNCH_AGENTS" clickhouse "$ROOT/clickhouse/server"
+write_agent "$LAUNCH_AGENTS" otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
   --config="$ROOT/otelcol.yaml"
 
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.clickhouse.plist" ||
