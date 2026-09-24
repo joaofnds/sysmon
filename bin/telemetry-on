@@ -34,7 +34,7 @@ OTEL_PASSWORD=$(secret clickhouse-otel)
 
 for name in $TELEMETRY_AGENTS; do
   launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name" 2>/dev/null || true
-  wait_until "sysmon.$name to unload" 30 agent_gone "$name"
+  wait_up_to 30 agent_gone "$name" || fail "sysmon.$name still loaded after 30s"
 done
 
 write_agent "$LAUNCH_AGENTS" clickhouse "$ROOT/clickhouse/server"
@@ -43,12 +43,12 @@ write_agent "$LAUNCH_AGENTS" otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-c
 
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.clickhouse.plist" ||
   fail "launchd refused sysmon.clickhouse"
-wait_until clickhouse 60 clickhouse_ready
+wait_up_to 60 clickhouse_ready || fail "clickhouse not ready in 60s, see logs/clickhouse.log"
 echo "clickhouse started (pid $(agent_pid clickhouse))"
 
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.otelcol.plist" ||
   fail "launchd refused sysmon.otelcol"
-wait_until otelcol 60 logs_table_exists
+wait_up_to 60 logs_table_exists || fail "otelcol did not create otel.otel_logs in 60s, see logs/otelcol.log"
 echo "otelcol started (pid $(agent_pid otelcol))"
 
 query --multiquery --queries-file schema.sql

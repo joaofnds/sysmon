@@ -62,6 +62,6 @@ write_agent "$ROOT/run" grafana /usr/bin/env \
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$ROOT/run/sysmon.grafana.plist" ||
   fail "launchd refused sysmon.grafana"
 
-wait_until grafana 60 grafana_ready
+wait_up_to 60 grafana_ready || fail "grafana not ready in 60s, see logs/grafana.log"
 echo "grafana started at $URL (pid $(agent_pid grafana)), bin/grafana-off stops it"
 open "$URL"

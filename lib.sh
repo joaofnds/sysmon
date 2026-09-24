@@ -103,12 +103,12 @@ stop_agent() {
   echo "$name stopped"
 }
 
-# Calls the script's own fail, which undoes what the script started.
-wait_until() {
-  what=$1 deadline=$(($(date +%s) + $2))
-  shift 2
+wait_up_to() {
+  deadline=$(($(date +%s) + $1))
+  shift
+
   while ! "$@"; do
-    [ "$(date +%s)" -lt "$deadline" ] || fail "timed out waiting for $what, see logs/"
+    [ "$(date +%s)" -lt "$deadline" ] || return 1
     sleep 1
   done
 }
