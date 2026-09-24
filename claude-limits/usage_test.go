@@ -53,24 +53,43 @@ func TestParseLimits(t *testing.T) {
 		})
 	})
 
-	t.Run("leaves the reset time zero when the limit has none", func(t *testing.T) {
-		body := `{"limits": [{"kind": "session", "percent": 0, "resets_at": null, "scope": null}]}`
+	t.Run("when a limit has no reset time", func(t *testing.T) {
+		t.Run("leaves the reset time zero", func(t *testing.T) {
+			body := `{"limits": [{"kind": "session", "percent": 0, "resets_at": null, "scope": null}]}`
 
-		limits, err := parseLimits([]byte(body))
+			limits, err := parseLimits([]byte(body))
 
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := []limit{{Kind: "session"}}; !reflect.DeepEqual(limits, want) {
-			t.Fatalf("got %+v, want %+v", limits, want)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if want := []limit{{Kind: "session"}}; !reflect.DeepEqual(limits, want) {
+				t.Fatalf("got %+v, want %+v", limits, want)
+			}
+		})
+	})
+
+	t.Run("when a limit is incomplete", func(t *testing.T) {
+		for _, row := range []struct{ name, body string }{
+			{"rejects a limit without a kind", `{"limits": [{"percent": 18, "resets_at": null, "scope": null}]}`},
+			{"rejects a limit without a percent", `{"limits": [{"kind": "session", "resets_at": null, "scope": null}]}`},
+		} {
+			t.Run(row.name, func(t *testing.T) {
+				_, err := parseLimits([]byte(row.body))
+
+				if !errors.Is(err, errIncompleteLimit) {
+					t.Fatalf("got %v, want %v", err, errIncompleteLimit)
+				}
+			})
 		}
 	})
 
-	t.Run("rejects a response without limits", func(t *testing.T) {
-		_, err := parseLimits([]byte(`{"five_hour": {"utilization": 18.0}}`))
+	t.Run("when the response has no limits", func(t *testing.T) {
+		t.Run("rejects it", func(t *testing.T) {
+			_, err := parseLimits([]byte(`{"five_hour": {"utilization": 18.0}}`))
 
-		if !errors.Is(err, errNoLimits) {
-			t.Fatalf("got %v, want %v", err, errNoLimits)
-		}
+			if !errors.Is(err, errNoLimits) {
+				t.Fatalf("got %v, want %v", err, errNoLimits)
+			}
+		})
 	})
 }
