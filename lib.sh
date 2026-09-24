@@ -43,8 +43,9 @@ agent_gone() {
 }
 
 write_agent() {
-  dir=$1 name=$2
-  shift 2
+  dir=$1 name=$2 process_type=$3
+  shift 3
+
   {
     cat <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -74,7 +75,7 @@ EOF
   <key>ExitTimeOut</key>
   <integer>30</integer>
   <key>ProcessType</key>
-  <string>Background</string>
+  <string>$process_type</string>
 </dict>
 </plist>
 EOF

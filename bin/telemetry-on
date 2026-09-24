@@ -37,8 +37,8 @@ for name in $TELEMETRY_AGENTS; do
   wait_up_to 30 agent_gone "$name" || fail "sysmon.$name still loaded after 30s"
 done
 
-write_agent "$LAUNCH_AGENTS" clickhouse "$ROOT/clickhouse/server"
-write_agent "$LAUNCH_AGENTS" otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
+write_agent "$LAUNCH_AGENTS" clickhouse Background "$ROOT/clickhouse/server"
+write_agent "$LAUNCH_AGENTS" otelcol Background "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
   --config="$ROOT/otelcol.yaml"
 
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.clickhouse.plist" ||

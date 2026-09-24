@@ -37,7 +37,7 @@ private_dir grafana-data logs run
 mkdir -p grafana/provisioning/plugins grafana/provisioning/alerting
 secret clickhouse-grafana >/dev/null
 
-write_agent "$ROOT/run" grafana /usr/bin/env \
+write_agent "$ROOT/run" grafana Standard /usr/bin/env \
   GF_PATHS_DATA="$ROOT/grafana-data" \
   GF_PATHS_LOGS="$ROOT/logs" \
   GF_PATHS_PLUGINS="$ROOT/result-grafana-plugins" \
