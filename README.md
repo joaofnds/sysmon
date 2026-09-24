@@ -8,7 +8,8 @@ plan is used. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes
 all three, and Grafana charts them.
 
 Nix provides all four programs, pinned by `flake.lock`. None is installed system-wide, and
-they run only between `bin/start` and `bin/stop`.
+they run only between `bin/start` and `bin/stop`. The flake builds for Apple silicon Macs
+only, and the scripts need Nix with flakes enabled.
 
 Beside them, an OpenTelemetry collector records Claude Code's telemetry in ClickHouse. Those
 two run under launchd and start again at login. Grafana charts both kinds of data and runs
@@ -101,9 +102,20 @@ leave a gap rather than repeat an old reading, and `logs/claude-limits.log` says
 
 An OpenTelemetry collector stores Claude Code's OpenTelemetry events in ClickHouse, and
 Grafana charts them, so token spend can be broken down by model, subagent, skill, MCP server,
-repository, session, prompt, and tool. Claude Code exports to it through the `OTEL_*`
-entries in `~/.claude/settings.json`. chezmoi renders that file from
-`dot_claude/private_settings.json` in the dotfiles repository, so change them there.
+repository, session, prompt, and tool. Claude Code exports to it when the `env` object of
+`~/.claude/settings.json` holds these entries:
+
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4327",
+    "OTEL_LOG_USER_PROMPTS": "1",
+    "OTEL_LOG_TOOL_DETAILS": "1",
+    "OTEL_LOG_ASSISTANT_RESPONSES": "0",
+    "OTEL_METRICS_INCLUDE_REPOSITORY": "true"
+
+On this Mac chezmoi renders that file from `dot_claude/private_settings.json` in the
+[dotfiles repository](https://github.com/joaofnds/dotfiles), so change them there.
 
     bin/telemetry-on    # starts ClickHouse and the collector under launchd, waits for the
                         # events table, and applies schema.sql
@@ -214,9 +226,10 @@ its first sample, so a longer interval makes `bin/start` wait longer.
     bin/uninstall
 
 It asks for confirmation, stops every service, removes the launchd agents of ClickHouse and
-the collector, and prints the commands that finish the job, without running them:
+the collector, and prints the commands that finish the job, without running them. For a
+clone at `/path/to/sysmon` they are:
 
-    rm -rf ~/code/sysmon
+    rm -rf /path/to/sysmon
     nix store gc
 
 The first one deletes the metrics and every collected Claude telemetry event.
