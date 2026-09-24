@@ -319,6 +319,387 @@
       "description": "Share of spend on summarizing a full conversation to free up context."
     },
     {
+      "id": 36,
+      "type": "row",
+      "title": "Plan limits",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 37,
+      "type": "bargauge",
+      "title": "Used now",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"session\"}",
+          "legendFormat": "Session",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"weekly_all\"}",
+          "legendFormat": "Weekly, all models",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"weekly_scoped\"}",
+          "legendFormat": "Weekly, {{model}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "color",
+        "namePlacement": "left",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "titleSize": 12,
+          "valueSize": 13
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "How much of each limit of the Claude plan is used, as Claude Code's /usage shows it. It is read every five minutes and only while sysmon's bin/start runs, so it is blank while that is stopped or the last read failed."
+    },
+    {
+      "id": 38,
+      "type": "stat",
+      "title": "Resets in",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 5,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_reset_timestamp_seconds{limit=\"session\"} - time()",
+          "legendFormat": "Session",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_reset_timestamp_seconds{limit=\"weekly_all\"} - time()",
+          "legendFormat": "Weekly, all models",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_reset_timestamp_seconds{limit=\"weekly_scoped\"} - time()",
+          "legendFormat": "Weekly, {{model}}",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "graphMode": "none",
+        "colorMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "auto",
+        "text": {
+          "titleSize": 12,
+          "valueSize": 18
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dtdurations",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "description": "Time left until each limit resets to zero. A session limit with no session under way has no reset time."
+    },
+    {
+      "id": 39,
+      "type": "timeseries",
+      "title": "Session limit",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"session\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "clamp(100 * (1 - (claude_limit_reset_timestamp_seconds{limit=\"session\"} - time()) / 18000), 0, 100)",
+          "legendFormat": "Even pace"
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Even pace"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 6,
+        "h": 8
+      },
+      "description": "The session limit through each five-hour session. Even pace is what would be used by now if the whole limit were spread evenly across the session, so a used line above it runs out before the reset."
+    },
+    {
+      "id": 40,
+      "type": "timeseries",
+      "title": "Weekly limits",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"weekly_all\"}",
+          "legendFormat": "All models"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit=\"weekly_scoped\"}",
+          "legendFormat": "{{model}}"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "clamp(100 * (1 - (claude_limit_reset_timestamp_seconds{limit=\"weekly_all\"} - time()) / 604800), 0, 100)",
+          "legendFormat": "Even pace"
+        }
+      ],
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Even pace"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 5,
+        "w": 6,
+        "h": 8
+      },
+      "description": "The weekly limit across all models and each per-model weekly limit through the week. Even pace is what would be used by now if the whole limit were spread evenly across the week, so a used line above it runs out before the reset."
+    },
+    {
       "id": 28,
       "type": "row",
       "title": "Where to save",
@@ -326,7 +707,7 @@
       "panels": [],
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 13,
         "w": 24,
         "h": 1
       }
@@ -429,7 +810,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 5,
+        "y": 14,
         "w": 15,
         "h": 9
       },
@@ -534,7 +915,7 @@
       },
       "gridPos": {
         "x": 15,
-        "y": 5,
+        "y": 14,
         "w": 9,
         "h": 9
       },
@@ -595,7 +976,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 14,
+        "y": 23,
         "w": 8,
         "h": 9
       },
@@ -656,7 +1037,7 @@
       },
       "gridPos": {
         "x": 8,
-        "y": 14,
+        "y": 23,
         "w": 8,
         "h": 9
       },
@@ -717,7 +1098,7 @@
       },
       "gridPos": {
         "x": 16,
-        "y": 14,
+        "y": 23,
         "w": 8,
         "h": 9
       },
@@ -778,7 +1159,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 32,
         "w": 12,
         "h": 9
       },
@@ -839,7 +1220,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 23,
+        "y": 32,
         "w": 12,
         "h": 9
       },
@@ -851,7 +1232,7 @@
       "title": "Where the money goes",
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 41,
         "w": 24,
         "h": 1
       },
@@ -868,7 +1249,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 33,
+        "y": 42,
         "w": 9,
         "h": 10
       },
@@ -993,7 +1374,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 33,
+        "y": 42,
         "w": 15,
         "h": 10
       },
@@ -1107,7 +1488,7 @@
       "title": "What the tokens are",
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 52,
         "w": 24,
         "h": 1
       },
@@ -1124,7 +1505,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 44,
+        "y": 53,
         "w": 9,
         "h": 10
       },
@@ -1264,7 +1645,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 44,
+        "y": 53,
         "w": 15,
         "h": 10
       },
@@ -1394,7 +1775,7 @@
       "title": "Who spends it",
       "gridPos": {
         "x": 0,
-        "y": 54,
+        "y": 63,
         "w": 24,
         "h": 1
       },
@@ -1411,7 +1792,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 55,
+        "y": 64,
         "w": 6,
         "h": 9
       },
@@ -1472,7 +1853,7 @@
       },
       "gridPos": {
         "x": 6,
-        "y": 55,
+        "y": 64,
         "w": 6,
         "h": 9
       },
@@ -1533,7 +1914,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 55,
+        "y": 64,
         "w": 6,
         "h": 9
       },
@@ -1594,7 +1975,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 55,
+        "y": 64,
         "w": 6,
         "h": 9
       },
@@ -1651,7 +2032,7 @@
       "title": "Sessions and prompts",
       "gridPos": {
         "x": 0,
-        "y": 64,
+        "y": 73,
         "w": 24,
         "h": 1
       },
@@ -1668,7 +2049,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 65,
+        "y": 74,
         "w": 9,
         "h": 10
       },
@@ -1749,7 +2130,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 65,
+        "y": 74,
         "w": 15,
         "h": 10
       },
@@ -1807,7 +2188,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 75,
+        "y": 84,
         "w": 12,
         "h": 14
       },
@@ -1868,7 +2249,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 75,
+        "y": 84,
         "w": 12,
         "h": 14
       },
@@ -1925,7 +2306,7 @@
       "title": "Tools",
       "gridPos": {
         "x": 0,
-        "y": 89,
+        "y": 98,
         "w": 24,
         "h": 1
       },
@@ -1942,7 +2323,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 90,
+        "y": 99,
         "w": 12,
         "h": 9
       },
@@ -2002,7 +2383,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 90,
+        "y": 99,
         "w": 12,
         "h": 9
       },
@@ -2058,7 +2439,7 @@
       "title": "Prompt details",
       "gridPos": {
         "x": 0,
-        "y": 99,
+        "y": 108,
         "w": 24,
         "h": 1
       },
@@ -2074,7 +2455,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 100,
+            "y": 109,
             "w": 24,
             "h": 12
           },

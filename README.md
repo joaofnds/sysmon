@@ -76,6 +76,11 @@ per-model weekly limits is used, and when each resets. It asks every five minute
 same endpoint Claude Code's `/usage` reads, `https://api.anthropic.com/api/oauth/usage`.
 Anthropic does not document that endpoint, so it can change or go away without notice.
 
+The Plan limits row of the Claude usage dashboard, http://localhost:3030/d/claude-usage,
+charts them. It reads VictoriaMetrics, so that row is blank while `bin/start` is not
+running. Its even pace line is how much of a limit would be used by now if the whole limit
+were spread evenly up to the reset, so use above that line runs out before the reset.
+
 It signs in with the Claude.ai login that Claude Code keeps in the Keychain item
 `Claude Code-credentials`, read again before every request, and it never refreshes that login.
 When a read fails, for example because the login expired and Claude Code has not refreshed
