@@ -353,7 +353,7 @@
             "uid": "victoriametrics"
           },
           "expr": "claude_limit_used_percent{limit=\"session\"}",
-          "legendFormat": "Session",
+          "legendFormat": "Five-hour session",
           "instant": true,
           "range": false
         },
@@ -378,6 +378,15 @@
           "legendFormat": "Weekly, {{model}}{{surface}}",
           "instant": true,
           "range": false
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "claude_limit_used_percent{limit!~\"session|weekly_all|weekly_scoped\"}",
+          "legendFormat": "{{limit}} {{model}}{{surface}}"
         }
       ],
       "options": {
@@ -449,8 +458,8 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "claude_limit_reset_timestamp_seconds{limit=\"session\"} - time()",
-          "legendFormat": "Session",
+          "expr": "clamp_min(claude_limit_reset_timestamp_seconds{limit=\"session\"} - time(), 0)",
+          "legendFormat": "Five-hour session",
           "instant": true,
           "range": false
         },
@@ -460,7 +469,7 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "claude_limit_reset_timestamp_seconds{limit=\"weekly_all\"} - time()",
+          "expr": "clamp_min(claude_limit_reset_timestamp_seconds{limit=\"weekly_all\"} - time(), 0)",
           "legendFormat": "Weekly, all models",
           "instant": true,
           "range": false
@@ -471,10 +480,19 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "claude_limit_reset_timestamp_seconds{limit=\"weekly_scoped\"} - time()",
+          "expr": "clamp_min(claude_limit_reset_timestamp_seconds{limit=\"weekly_scoped\"} - time(), 0)",
           "legendFormat": "Weekly, {{model}}{{surface}}",
           "instant": true,
           "range": false
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "clamp_min(claude_limit_reset_timestamp_seconds{limit!~\"session|weekly_all|weekly_scoped\"} - time(), 0)",
+          "legendFormat": "{{limit}} {{model}}{{surface}}"
         }
       ],
       "options": {
@@ -511,7 +529,7 @@
     {
       "id": 39,
       "type": "timeseries",
-      "title": "Session limit",
+      "title": "Five-hour session limit",
       "datasource": {
         "type": "prometheus",
         "uid": "victoriametrics"
@@ -597,7 +615,7 @@
         "w": 6,
         "h": 8
       },
-      "description": "The session limit through each five-hour session. Even pace is what would be used by now if the whole limit were spread evenly across the session, so a used line above it runs out before the reset."
+      "description": "The session limit through each five-hour session, which is Anthropic's usage window and not a Claude Code session. Even pace is what would be used by now if the whole limit were spread evenly across the session, so a used line above it runs out before the reset if use keeps its average rate so far."
     },
     {
       "id": 40,
@@ -697,7 +715,7 @@
         "w": 6,
         "h": 8
       },
-      "description": "The weekly limit across all models and each per-model weekly limit through the week. Even pace is what would be used by now if the whole limit were spread evenly across the week, so a used line above it runs out before the reset."
+      "description": "The weekly limit across all models and each weekly limit of one model or one surface through the week. Even pace is what would be used by now if the whole limit were spread evenly across the week of the limit across all models, so a used line above it runs out before the reset if use keeps its average rate so far."
     },
     {
       "id": 28,
