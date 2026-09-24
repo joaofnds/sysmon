@@ -1,0 +1,67 @@
+#!/bin/sh
+set -eu
+. "$(dirname "$0")/../lib.sh"
+
+RETENTION=90d
+MACTOP_PORT=2112
+VM_ADDR=127.0.0.1:8428
+
+fail() {
+  echo "start: $*" >&2
+  bin/stop >&2
+  exit 1
+}
+
+wait_until() {
+  svc=$1 seconds=$2
+  shift 2
+  while ! "$@"; do
+    pid_of "$svc" >/dev/null || fail "$svc exited, see logs/$svc.log"
+    seconds=$((seconds - 1))
+    [ "$seconds" -gt 0 ] || fail "$svc not ready in time, see logs/$svc.log"
+    sleep 1
+  done
+}
+
+mactop_has_sample() {
+  curl -s --max-time 2 "http://127.0.0.1:$MACTOP_PORT/metrics" |
+    grep -q '^mactop_memory_gb{type="total"} [1-9]'
+}
+
+vm_healthy() {
+  curl -s --max-time 2 "http://$VM_ADDR/health" | grep -q OK
+}
+
+for svc in mactop victoria-metrics; do
+  if pid=$(pid_of "$svc"); then
+    echo "start: $svc is already running (pid $pid)" >&2
+    exit 1
+  fi
+done
+
+interval=$(awk '$1 == "scrape_interval:" { print $2; exit }' scrape.yml)
+case $interval in
+  "" | s | *[!s] | *[!0-9]*s) echo "start: scrape_interval must be whole seconds like 10s, got '$interval'" >&2; exit 1 ;;
+esac
+seconds=${interval%s}
+
+nix build .#mactop --out-link result-mactop
+nix build .#victoriametrics --out-link result-victoriametrics
+mkdir -p data logs run
+
+nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((seconds * 1000))" \
+  >/dev/null 2>>logs/mactop.log &
+echo $! >run/mactop.pid
+echo "mactop started (pid $!), waiting for its first sample"
+wait_until mactop $((seconds * 3 + 30)) mactop_has_sample
+
+nohup ./result-victoriametrics/bin/victoria-metrics \
+  -httpListenAddr="$VM_ADDR" \
+  -storageDataPath=data \
+  -retentionPeriod="$RETENTION" \
+  -promscrape.config=scrape.yml \
+  -vmui.customDashboardsPath=dashboards \
+  >>logs/victoria-metrics.log 2>&1 &
+echo $! >run/victoria-metrics.pid
+wait_until victoria-metrics 30 vm_healthy
+echo "victoria-metrics started (pid $!), UI at http://$VM_ADDR/vmui"

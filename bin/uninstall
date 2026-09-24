@@ -1,0 +1,24 @@
+#!/bin/sh
+set -u
+. "$(dirname "$0")/../lib.sh"
+
+printf 'Stop sysmon and print the commands that remove it? [y/N] '
+read -r answer
+case $answer in
+  y | Y | yes) ;;
+  *) echo "aborted"; exit 1 ;;
+esac
+
+bin/stop
+
+cat <<MSG
+
+Nothing has been deleted. To remove sysmon completely, run:
+
+  rm -rf "$ROOT"
+
+Optionally, free the Nix store paths it used (this also collects
+anything else on this machine that has no GC root):
+
+  nix store gc
+MSG

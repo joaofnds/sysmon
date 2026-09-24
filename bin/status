@@ -1,0 +1,19 @@
+#!/bin/sh
+set -u
+. "$(dirname "$0")/../lib.sh"
+
+for svc in mactop victoria-metrics; do
+  if pid=$(pid_of "$svc"); then
+    ps -p "$pid" -o %cpu=,rss= |
+      awk -v svc="$svc" -v pid="$pid" '{ printf "%-17s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
+  else
+    printf '%-17s stopped\n' "$svc"
+  fi
+done
+
+health=$(curl -s --max-time 3 http://127.0.0.1:8428/api/v1/targets | grep -o '"health":"[a-z]*"' | cut -d'"' -f4)
+echo "scrape target     ${health:-unknown (victoria-metrics unreachable)}"
+
+if [ -d data ]; then
+  echo "data size         $(du -sh data | cut -f1)"
+fi

@@ -1,0 +1,23 @@
+#!/bin/sh
+set -u
+. "$(dirname "$0")/../lib.sh"
+
+for svc in victoria-metrics mactop; do
+  if pid=$(pid_of "$svc"); then
+    kill "$pid"
+    seconds=30
+    while kill -0 "$pid" 2>/dev/null && [ "$seconds" -gt 0 ]; do
+      sleep 1
+      seconds=$((seconds - 1))
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -9 "$pid"
+      echo "$svc did not exit in 30s, killed (pid $pid)"
+    else
+      echo "$svc stopped (pid $pid)"
+    fi
+  else
+    echo "$svc not running"
+  fi
+  rm -f "run/$svc.pid"
+done
