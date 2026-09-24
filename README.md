@@ -2,8 +2,8 @@
 
 A local monitor for this Mac. [mactop](https://github.com/metaspartan/mactop) samples CPU,
 GPU, power, temperatures, memory, network, disk and battery, and exposes them as Prometheus
-metrics. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes them, stores
-them, and serves the UI.
+metrics. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes and stores
+them, and Grafana charts them.
 
 Nix provides both programs, pinned by `flake.lock`. Neither is installed system-wide, and
 both run only between `bin/start` and `bin/stop`.
@@ -18,7 +18,15 @@ it in Grafana. That stack does start on its own, with OrbStack. See Claude telem
                   # and the state of each Claude telemetry container
     bin/stop      # stops both and removes their PID files
 
-UI: http://127.0.0.1:8428/vmui, with the prepared dashboard under the Dashboards tab.
+Dashboard: http://localhost:3030/d/mac-system. It is served by the Grafana of the Claude
+telemetry stack below, which reads VictoriaMetrics through `host.docker.internal:8428`, so
+it shows data only while `bin/start` is running. Hover any chart and every other chart
+marks the same moment, which lines up a load spike with the power, heat and fan speed it
+caused. For ad hoc queries, VictoriaMetrics has its own UI at http://127.0.0.1:8428/vmui.
+
+mactop 2.1.5 reads CPU, DRAM and Neural Engine power and DRAM bandwidth as zero on this
+M5 Pro, so the dashboard charts only whole-machine and GPU power, and leaves out the
+samples where those readings spike and the occasional impossible network sample.
 
 Both listen on 127.0.0.1 only: mactop on port 2112, VictoriaMetrics on 8428.
 
@@ -79,14 +87,13 @@ collector.
 | `logs/` | stderr of mactop and VictoriaMetrics |
 | `run/` | PID files |
 | `result-mactop`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
-| `dashboards/mactop.json` | The vmui dashboard |
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
 | `compose.yaml` | The Claude telemetry stack |
 | `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
 | `clickhouse.xml`, `clickhouse-users.xml` | ClickHouse server settings and the read-only `grafana` user |
 | `schema.sql` | Claude telemetry retention and query views |
-| `grafana/` | Grafana datasource, dashboard provisioning, and the Claude usage dashboard |
+| `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
 
 The two `result-*` links are Nix GC roots: `nix store gc` keeps both packages while the
 links exist.
