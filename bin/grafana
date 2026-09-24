@@ -10,6 +10,10 @@ fail() {
   exit 1
 }
 
+grafana_ready() {
+  curl -sf --max-time 2 "$URL/api/health" >/dev/null
+}
+
 if pid=$(agent_pid grafana); then
   echo "grafana is already running (pid $pid)"
   open "$URL"
@@ -51,12 +55,6 @@ write_agent "$ROOT/run" grafana /usr/bin/env \
 launchctl bootstrap "$LAUNCHD_DOMAIN" "$ROOT/run/sysmon.grafana.plist" ||
   fail "launchd refused sysmon.grafana"
 
-for _ in $(seq 60); do
-  if curl -sf --max-time 2 "$URL/api/health" >/dev/null; then
-    echo "grafana started at $URL (pid $(agent_pid grafana)), bin/grafana-off stops it"
-    open "$URL"
-    exit 0
-  fi
-  sleep 1
-done
-fail "not ready in 60s, see logs/grafana.log"
+wait_until grafana 60 grafana_ready
+echo "grafana started at $URL (pid $(agent_pid grafana)), bin/grafana-off stops it"
+open "$URL"

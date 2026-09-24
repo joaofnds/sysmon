@@ -14,15 +14,6 @@ query() {
   CLICKHOUSE_PASSWORD=$OTEL_PASSWORD "$CLICKHOUSE" client --port 9327 -u otel "$@"
 }
 
-wait_until() {
-  what=$1 deadline=$(($(date +%s) + $2))
-  shift 2
-  while ! "$@"; do
-    [ "$(date +%s)" -lt "$deadline" ] || fail "timed out waiting for $what, see logs/"
-    sleep 1
-  done
-}
-
 probe() {
   query --connect_timeout=2 --receive_timeout=2 -q "$1" 2>/dev/null
 }
