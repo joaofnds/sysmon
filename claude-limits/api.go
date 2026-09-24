@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-var errUsageAPI = errors.New("the usage API refused the request")
+var errUsageAPI = errors.New("the usage API answered with an error status")
 
 // usageAPI is the endpoint Claude Code's /usage reads. Anthropic does not document it.
 type usageAPI struct {
@@ -19,8 +19,9 @@ type usageAPI struct {
 func (a usageAPI) limits(ctx context.Context, token string) ([]limit, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.baseURL+"/api/oauth/usage", nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("building the usage API request: %w", err)
 	}
+
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("anthropic-beta", "oauth-2025-04-20")
 	req.Header.Set("Accept", "application/json")
@@ -30,7 +31,8 @@ func (a usageAPI) limits(ctx context.Context, token string) ([]limit, error) {
 	if err != nil {
 		return nil, fmt.Errorf("calling the usage API: %w", err)
 	}
-	defer resp.Body.Close()
+
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("%w: %s", errUsageAPI, resp.Status)
 	}
@@ -39,5 +41,6 @@ func (a usageAPI) limits(ctx context.Context, token string) ([]limit, error) {
 	if err != nil {
 		return nil, fmt.Errorf("reading the usage API's answer: %w", err)
 	}
+
 	return parseLimits(body)
 }

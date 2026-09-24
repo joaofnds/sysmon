@@ -17,8 +17,10 @@ func accessToken(item []byte) (string, error) {
 	if err := json.Unmarshal(item, &credentials); err != nil {
 		return "", fmt.Errorf("reading Claude Code's credentials: %w", err)
 	}
+
 	if credentials.ClaudeAIOAuth == nil || credentials.ClaudeAIOAuth.AccessToken == "" {
 		return "", errNoAccessToken
 	}
+
 	return credentials.ClaudeAIOAuth.AccessToken, nil
 }
