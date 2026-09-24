@@ -1,19 +1,19 @@
 cd "$(dirname "$0")/.." || exit 1
 ROOT=$PWD
 
-pid_of() {
+pid_of() (
   [ -f "run/$1.pid" ] || return 1
   pid=$(cat "run/$1.pid")
   ps -p "$pid" -o comm= 2>/dev/null | grep -q "$1" || return 1
   echo "$pid"
-}
+)
 
 private_dir() {
   mkdir -p "$@"
   chmod 700 "$@"
 }
 
-secret() {
+secret() (
   private_dir secrets
   if [ ! -e "secrets/$1" ]; then
     new=$(mktemp "secrets/.$1.XXXXXX")
@@ -26,23 +26,23 @@ secret() {
   [ "$(wc -l <"secrets/$1")" -eq 0 ] ||
     { echo "secrets/$1 ends in a newline, which the collector would read as part of the password" >&2; return 1; }
   cat "secrets/$1"
-}
+)
 
 LAUNCH_AGENTS=$HOME/Library/LaunchAgents
 LAUNCHD_DOMAIN=gui/$(id -u)
 TELEMETRY_AGENTS="otelcol clickhouse"
 
-agent_pid() {
+agent_pid() (
   pid=$(launchctl print "$LAUNCHD_DOMAIN/sysmon.$1" 2>/dev/null | awk '$1 == "pid" { print $3; exit }')
   [ -n "$pid" ] || return 1
   echo "$pid"
-}
+)
 
 agent_gone() {
   ! launchctl print "$LAUNCHD_DOMAIN/sysmon.$1" >/dev/null 2>&1
 }
 
-write_agent() {
+write_agent() (
   dir=$1 name=$2 process_type=$3
   shift 3
 
@@ -80,9 +80,9 @@ EOF
 </plist>
 EOF
   } >"$dir/sysmon.$name.plist"
-}
+)
 
-stop_agent() {
+stop_agent() (
   dir=$1 name=$2
 
   rm -f "$dir/sysmon.$name.plist"
@@ -103,9 +103,9 @@ stop_agent() {
     return 1
   fi
   echo "$name stopped"
-}
+)
 
-wait_up_to() {
+wait_up_to() (
   deadline=$(($(date +%s) + $1))
   shift
 
@@ -113,4 +113,4 @@ wait_up_to() {
     [ "$(date +%s)" -lt "$deadline" ] || return 1
     sleep 1
   done
-}
+)

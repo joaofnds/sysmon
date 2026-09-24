@@ -435,7 +435,7 @@
         },
         "overrides": []
       },
-      "description": "How much of each limit of the Claude plan is used, as Claude Code's /usage shows it. It is read every five minutes and only while sysmon's bin/start runs, so it is blank while that is stopped or the last read failed."
+      "description": "How much of each limit of the Claude plan is used, as Claude Code's /usage shows it. It is read every five minutes and only while sysmon's metrics services run, so it is blank while they are stopped or the last read failed."
     },
     {
       "id": 38,

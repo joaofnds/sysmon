@@ -1,0 +1,361 @@
+#!/bin/sh
+set -u
+. "$(dirname "$0")/../lib.sh"
+
+RETENTION=90d
+MACTOP_PORT=2112
+PROCS_ADDR=127.0.0.1:2113
+LIMITS_ADDR=127.0.0.1:2114
+VM_ADDR=127.0.0.1:8428
+CLICKHOUSE=$ROOT/result-clickhouse/bin/clickhouse
+GRAFANA_PORT=3030
+GRAFANA_URL=http://localhost:$GRAFANA_PORT
+
+usage() {
+  cat <<EOF
+usage: sysmon <command> [<subcommand>]
+
+  sysmon metrics [start]     starts mactop, sysmon-procs, claude-limits and VictoriaMetrics
+  sysmon metrics stop        stops them
+  sysmon telemetry [start]   starts ClickHouse and the OpenTelemetry collector under
+                             launchd, which starts them again at login
+  sysmon telemetry stop      stops both and removes their launchd agents
+  sysmon grafana [start]     starts Grafana in the background and opens the dashboards
+  sysmon grafana stop        stops Grafana
+  sysmon status              shows every service, the health of each scrape target and
+                             the size of the stored data
+  sysmon uninstall           stops everything and prints the commands that remove sysmon
+  sysmon help                shows this help
+
+A service given without a subcommand starts.
+EOF
+}
+
+metrics_abort() {
+  metrics_stop >&2
+  exit 1
+}
+
+metrics_wait() (
+  svc=$1 seconds=$2
+  shift 2
+  while ! "$@"; do
+    if ! pid_of "$svc" >/dev/null; then
+      echo "metrics: $svc exited, see logs/$svc.log" >&2
+      return 1
+    fi
+    seconds=$((seconds - 1))
+    if [ "$seconds" -le 0 ]; then
+      echo "metrics: $svc not ready in time, see logs/$svc.log" >&2
+      return 1
+    fi
+    sleep 1
+  done
+)
+
+mactop_has_sample() {
+  curl -s --max-time 2 "http://127.0.0.1:$MACTOP_PORT/metrics" |
+    grep -q '^mactop_memory_gb{type="total"} [1-9]'
+}
+
+procs_has_sample() {
+  curl -sf --max-time 2 "http://$PROCS_ADDR/metrics" >/dev/null
+}
+
+limits_listening() {
+  curl -s --max-time 2 -o /dev/null "http://$LIMITS_ADDR/metrics"
+}
+
+vm_healthy() {
+  curl -s --max-time 2 "http://$VM_ADDR/health" | grep -q OK
+}
+
+metrics_start() (
+  set -e
+
+  for svc in mactop sysmon-procs claude-limits victoria-metrics; do
+    if pid=$(pid_of "$svc"); then
+      echo "metrics: $svc is already running (pid $pid)" >&2
+      return 1
+    fi
+  done
+
+  interval=$(awk '$1 == "scrape_interval:" { print $2; exit }' scrape.yml)
+  case $interval in
+    "" | s | *[!s] | *[!0-9]*s) echo "metrics: scrape_interval must be whole seconds like 10s, got '$interval'" >&2; return 1 ;;
+  esac
+  interval_seconds=${interval%s}
+
+  nix build .#mactop --out-link result-mactop
+  nix build .#sysmon-procs --out-link result-sysmon-procs
+  nix build .#claude-limits --out-link result-claude-limits
+  nix build .#victoriametrics --out-link result-victoriametrics
+  private_dir data logs run
+
+  nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((interval_seconds * 1000))" \
+    >/dev/null 2>>logs/mactop.log &
+  echo $! >run/mactop.pid
+  echo "mactop started (pid $!), waiting for its first sample"
+  metrics_wait mactop $((interval_seconds * 3 + 30)) mactop_has_sample || metrics_abort
+
+  nohup ./result-sysmon-procs/bin/sysmon-procs -listen "$PROCS_ADDR" -interval "$interval" \
+    >/dev/null 2>>logs/sysmon-procs.log &
+  echo $! >run/sysmon-procs.pid
+  echo "sysmon-procs started (pid $!), waiting for its first sample"
+  metrics_wait sysmon-procs $((interval_seconds + 30)) procs_has_sample || metrics_abort
+
+  nohup ./result-claude-limits/bin/claude-limits -listen "$LIMITS_ADDR" \
+    >/dev/null 2>>logs/claude-limits.log &
+  echo $! >run/claude-limits.pid
+  echo "claude-limits started (pid $!)"
+  metrics_wait claude-limits 10 limits_listening || metrics_abort
+
+  nohup ./result-victoriametrics/bin/victoria-metrics \
+    -httpListenAddr="$VM_ADDR" \
+    -storageDataPath=data \
+    -retentionPeriod="$RETENTION" \
+    -promscrape.config=scrape.yml \
+    >>logs/victoria-metrics.log 2>&1 &
+  echo $! >run/victoria-metrics.pid
+  metrics_wait victoria-metrics 30 vm_healthy || metrics_abort
+  echo "victoria-metrics started (pid $!), sysmon grafana shows the dashboards"
+)
+
+metrics_stop() (
+  set +e
+
+  for svc in victoria-metrics claude-limits sysmon-procs mactop; do
+    if pid=$(pid_of "$svc"); then
+      kill "$pid"
+      seconds=30
+      while kill -0 "$pid" 2>/dev/null && [ "$seconds" -gt 0 ]; do
+        sleep 1
+        seconds=$((seconds - 1))
+      done
+      if kill -0 "$pid" 2>/dev/null; then
+        kill -9 "$pid"
+        echo "$svc did not exit in 30s, killed (pid $pid)"
+      else
+        echo "$svc stopped (pid $pid)"
+      fi
+    else
+      echo "$svc not running"
+    fi
+    rm -f "run/$svc.pid"
+  done
+)
+
+telemetry_fail() {
+  echo "telemetry: $*" >&2
+  telemetry_stop >&2
+  exit 1
+}
+
+query() {
+  CLICKHOUSE_PASSWORD=$OTEL_PASSWORD "$CLICKHOUSE" client --port 9327 -u otel "$@"
+}
+
+probe() {
+  query --connect_timeout=2 --receive_timeout=2 -q "$1" 2>/dev/null
+}
+
+clickhouse_ready() {
+  probe 'SELECT 1' >/dev/null
+}
+
+logs_table_exists() {
+  [ "$(probe 'EXISTS TABLE otel.otel_logs')" = 1 ]
+}
+
+telemetry_start() (
+  set -e
+
+  nix build .#clickhouse --out-link result-clickhouse
+  nix build .#otelcol-contrib --out-link result-otelcol-contrib
+  private_dir clickhouse-data logs
+  mkdir -p "$LAUNCH_AGENTS"
+  OTEL_PASSWORD=$(secret clickhouse-otel)
+
+  for name in $TELEMETRY_AGENTS; do
+    launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name" 2>/dev/null || true
+    wait_up_to 30 agent_gone "$name" || telemetry_fail "sysmon.$name still loaded after 30s"
+  done
+
+  write_agent "$LAUNCH_AGENTS" clickhouse Background "$ROOT/clickhouse/server"
+  write_agent "$LAUNCH_AGENTS" otelcol Background "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
+    --config="$ROOT/otelcol.yaml"
+
+  launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.clickhouse.plist" ||
+    telemetry_fail "launchd refused sysmon.clickhouse"
+  wait_up_to 60 clickhouse_ready || telemetry_fail "clickhouse not ready in 60s, see logs/clickhouse.log"
+  echo "clickhouse started (pid $(agent_pid clickhouse))"
+
+  launchctl bootstrap "$LAUNCHD_DOMAIN" "$LAUNCH_AGENTS/sysmon.otelcol.plist" ||
+    telemetry_fail "launchd refused sysmon.otelcol"
+  wait_up_to 60 logs_table_exists || telemetry_fail "otelcol did not create otel.otel_logs in 60s, see logs/otelcol.log"
+  echo "otelcol started (pid $(agent_pid otelcol))"
+
+  query --multiquery --queries-file schema.sql
+  echo "schema.sql applied. Both start at login until sysmon telemetry stop."
+)
+
+telemetry_stop() (
+  set +e
+
+  status=0
+  for name in $TELEMETRY_AGENTS; do
+    stop_agent "$LAUNCH_AGENTS" "$name" || status=1
+  done
+  return "$status"
+)
+
+grafana_fail() {
+  echo "grafana: $*" >&2
+  grafana_stop >&2
+  exit 1
+}
+
+grafana_ready() {
+  curl -sf --max-time 2 "$GRAFANA_URL/api/health" >/dev/null
+}
+
+grafana_start() (
+  set -e
+
+  if pid=$(agent_pid grafana); then
+    echo "grafana is already running (pid $pid)"
+    open "$GRAFANA_URL"
+    return 0
+  fi
+
+  if ! agent_gone grafana; then
+    grafana_stop
+  fi
+
+  if nc -z -G 2 127.0.0.1 "$GRAFANA_PORT" 2>/dev/null; then
+    echo "grafana: port $GRAFANA_PORT is taken by" >&2
+    netstat -anv -p tcp | awk -v port="$GRAFANA_PORT" '$6 == "LISTEN" && $4 ~ "[.]" port "$" { print "  " $11 }' >&2
+    return 1
+  fi
+
+  nix build .#grafana --out-link result-grafana
+  nix build .#grafana-plugins --out-link result-grafana-plugins
+  private_dir grafana-data logs run
+  mkdir -p grafana/provisioning/plugins grafana/provisioning/alerting
+  secret clickhouse-grafana >/dev/null
+
+  write_agent "$ROOT/run" grafana Standard /usr/bin/env \
+    GF_PATHS_DATA="$ROOT/grafana-data" \
+    GF_PATHS_LOGS="$ROOT/logs" \
+    GF_PATHS_PLUGINS="$ROOT/result-grafana-plugins" \
+    GF_PATHS_PROVISIONING="$ROOT/grafana/provisioning" \
+    GF_PLUGINS_PREINSTALL_DISABLED=true \
+    GF_PLUGINS_DISABLE_PLUGINS=elasticsearch,grafana-postgresql-datasource,grafana-pyroscope-datasource,influxdb,jaeger,loki,mssql,mysql,opentsdb,stackdriver,tempo,zipkin \
+    GF_LOG_MODE=console \
+    GF_LOG_LEVEL=warn \
+    GF_AUTH_ANONYMOUS_ENABLED=true \
+    GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer \
+    GF_AUTH_DISABLE_LOGIN_FORM=true \
+    GF_AUTH_DISABLE_LOGIN=true \
+    GF_AUTH_BASIC_ENABLED=false \
+    GF_SERVER_HTTP_ADDR=127.0.0.1 \
+    GF_SERVER_HTTP_PORT="$GRAFANA_PORT" \
+    GF_SERVER_DOMAIN=localhost \
+    GF_SERVER_ENFORCE_DOMAIN=true \
+    GF_SERVER_ROOT_URL="$GRAFANA_URL/" \
+    GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH="$ROOT/grafana/dashboards/claude-usage.json" \
+    "$ROOT/result-grafana/bin/grafana" server --homepath "$ROOT/result-grafana"
+
+  launchctl bootstrap "$LAUNCHD_DOMAIN" "$ROOT/run/sysmon.grafana.plist" ||
+    grafana_fail "launchd refused sysmon.grafana"
+
+  wait_up_to 60 grafana_ready || grafana_fail "grafana not ready in 60s, see logs/grafana.log"
+  echo "grafana started at $GRAFANA_URL (pid $(agent_pid grafana)), sysmon grafana stop stops it"
+  open "$GRAFANA_URL"
+)
+
+grafana_stop() (
+  set +e
+
+  stop_agent "$ROOT/run" grafana
+)
+
+show_status() (
+  for svc in mactop sysmon-procs claude-limits victoria-metrics $TELEMETRY_AGENTS grafana; do
+    if pid=$(pid_of "$svc") || pid=$(agent_pid "$svc"); then
+      ps -p "$pid" -o %cpu=,rss= |
+        awk -v svc="$svc" -v pid="$pid" '{ printf "%-17s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
+    elif ! agent_gone "$svc"; then
+      printf '%-17s loaded but not running, see logs/%s.log\n' "$svc" "$svc"
+    else
+      printf '%-17s stopped\n' "$svc"
+    fi
+  done
+
+  targets=$(curl -s --max-time 3 "http://$VM_ADDR/api/v1/targets" |
+    grep -o '"scrapePool":"[^"]*"\|"health":"[a-z]*"' | cut -d'"' -f4 | paste - -)
+  if [ -n "$targets" ]; then
+    echo "$targets" | awk '{ printf "%-17s scrape %s\n", $1, $2 }'
+  else
+    echo "scrape targets    unknown (victoria-metrics unreachable)"
+  fi
+
+  if [ -d data ]; then
+    echo "data size         $(du -sh data | cut -f1)"
+  fi
+
+  if [ -d clickhouse-data ]; then
+    echo "telemetry size    $(du -sh clickhouse-data | cut -f1)"
+  fi
+)
+
+uninstall() (
+  set +e
+
+  printf 'Stop sysmon and print the commands that remove it? [y/N] '
+  read -r answer
+  case $answer in
+    y | Y | yes) ;;
+    *) echo "aborted"; return 1 ;;
+  esac
+
+  status=0
+  metrics_stop
+  telemetry_stop || status=1
+  grafana_stop || status=1
+
+  if [ "$status" -ne 0 ]; then
+    echo "uninstall: a launchd job above is still loaded, and deleting $ROOT now would leave it registered" >&2
+    return 1
+  fi
+
+  cat <<MSG
+
+Nothing has been deleted. To remove sysmon completely, including the
+metrics and the Claude telemetry events, run:
+
+  rm -rf "$ROOT"
+
+Optionally, free the Nix store paths it used (this also collects
+anything else on this machine that has no GC root):
+
+  nix store gc
+MSG
+)
+
+case $* in
+  "" | help | -h | --help) usage ;;
+  metrics | "metrics start") metrics_start ;;
+  "metrics stop") metrics_stop ;;
+  telemetry | "telemetry start") telemetry_start ;;
+  "telemetry stop") telemetry_stop ;;
+  grafana | "grafana start") grafana_start ;;
+  "grafana stop") grafana_stop ;;
+  status) show_status ;;
+  uninstall) uninstall ;;
+  *)
+    echo "sysmon: unknown command '$*'" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

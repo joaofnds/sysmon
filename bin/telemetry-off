@@ -1,9 +1,0 @@
-#!/bin/sh
-set -u
-. "$(dirname "$0")/../lib.sh"
-
-status=0
-for name in $TELEMETRY_AGENTS; do
-  stop_agent "$LAUNCH_AGENTS" "$name" || status=1
-done
-exit "$status"
