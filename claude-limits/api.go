@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 var errUsageAPI = errors.New("the usage API answered with an error status")
@@ -14,6 +15,10 @@ var errUsageAPI = errors.New("the usage API answered with an error status")
 type usageAPI struct {
 	client  *http.Client
 	baseURL string
+}
+
+func anthropicUsageAPI() usageAPI {
+	return usageAPI{client: &http.Client{Timeout: 10 * time.Second}, baseURL: "https://api.anthropic.com"}
 }
 
 func (a usageAPI) limits(ctx context.Context, token string) ([]limit, error) {
