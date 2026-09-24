@@ -41,7 +41,8 @@ files only when they start, `up -d` alone leaves a running container as it is, a
 `schema` service reapplies `schema.sql` on every start.
 
 The collected events live in the Docker volumes `claude-telemetry_clickhouse` and
-`claude-telemetry_grafana`, named after the Compose project, not this folder.
+`claude-telemetry_grafana`. `compose.yaml` names them outright, so renaming the Compose
+project or moving this folder keeps them.
 
 `clickhouse.xml` turns off ClickHouse's own system log tables, which otherwise double its
 idle CPU and memory. It lists every log section active in the pinned image's `config.xml`

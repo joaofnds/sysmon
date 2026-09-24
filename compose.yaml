@@ -1,4 +1,3 @@
-# The volumes holding every collected event are named after this project, so a new name starts on empty ones.
 name: claude-telemetry
 
 services:
@@ -74,4 +73,6 @@ services:
 
 volumes:
   clickhouse:
+    name: claude-telemetry_clickhouse
   grafana:
+    name: claude-telemetry_grafana
