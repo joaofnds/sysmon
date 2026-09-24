@@ -3,10 +3,11 @@
 A local monitor for this Mac. [mactop](https://github.com/metaspartan/mactop) samples CPU,
 GPU, power, temperatures, memory, network, disk and battery, and exposes them as Prometheus
 metrics. `sysmon-procs`, a small collector in `procs/`, measures the same resources for each
-app. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes and stores both, and
-Grafana charts them.
+app. `claude-limits`, in `claude-limits/`, reads how much of each usage limit of the Claude
+plan is used. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes and stores
+all three, and Grafana charts them.
 
-Nix provides all three programs, pinned by `flake.lock`. None is installed system-wide, and
+Nix provides all four programs, pinned by `flake.lock`. None is installed system-wide, and
 they run only between `bin/start` and `bin/stop`.
 
 Beside them, a Docker Compose stack records Claude Code's telemetry in ClickHouse and charts
@@ -15,10 +16,10 @@ it in Grafana. That stack does start on its own, with OrbStack. See Claude telem
 ## Use
 
     bin/start     # starts mactop and sysmon-procs, waits for their first samples,
-                  # then VictoriaMetrics
+                  # then claude-limits and VictoriaMetrics
     bin/status    # running or not, PIDs, CPU% and RSS, the health of each scrape target,
                   # data size, and the state of each Claude telemetry container
-    bin/stop      # stops all three and removes their PID files
+    bin/stop      # stops all four and removes their PID files
 
 Dashboard: http://localhost:3030/d/mac-system. It is served by the Grafana of the Claude
 telemetry stack below, which reads VictoriaMetrics through `host.docker.internal:8428`, so
@@ -65,8 +66,22 @@ mactop 2.1.5 reads CPU, DRAM and Neural Engine power and DRAM bandwidth as zero 
 M5 Pro, so the dashboard charts only whole-machine and GPU power, and leaves out the
 samples where those readings spike and the occasional impossible network sample.
 
-All three listen on 127.0.0.1 only: mactop on port 2112, sysmon-procs on 2113,
-VictoriaMetrics on 8428.
+All four listen on 127.0.0.1 only: mactop on port 2112, sysmon-procs on 2113,
+claude-limits on 2114, VictoriaMetrics on 8428.
+
+## Claude plan limits
+
+`claude-limits` reads how much of the Claude plan's session limit, weekly limit and
+per-model weekly limits is used, and when each resets. It asks every five minutes, from the
+same endpoint Claude Code's `/usage` reads, `https://api.anthropic.com/api/oauth/usage`.
+Anthropic does not document that endpoint, so it can change or go away without notice.
+
+It signs in with the Claude.ai login that Claude Code keeps in the Keychain item
+`Claude Code-credentials`, read again before every request, and it never refreshes that login.
+When a read fails, for example because the login expired and Claude Code has not refreshed
+it yet, `/metrics` answers 503 until the next read succeeds. VictoriaMetrics then marks the
+target down, `bin/status` shows it, the charts leave a gap rather than repeat an old
+reading, and `logs/claude-limits.log` says why.
 
 ## Claude telemetry
 
@@ -122,10 +137,11 @@ collector.
 | Path | Contents |
 |---|---|
 | `data/` | VictoriaMetrics storage |
-| `logs/` | stderr of mactop, sysmon-procs and VictoriaMetrics |
+| `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics |
 | `run/` | PID files |
-| `result-mactop`, `result-sysmon-procs`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
+| `result-mactop`, `result-sysmon-procs`, `result-claude-limits`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
 | `procs/` | Source of `sysmon-procs`, the per-app collector |
+| `claude-limits/` | Source of `claude-limits`, the Claude plan limits collector |
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
 | `compose.yaml` | The Claude telemetry stack |
@@ -156,8 +172,9 @@ intervals to produce its first sample, so a longer interval makes `bin/start` wa
 
     bin/uninstall
 
-It asks for confirmation, stops mactop, sysmon-procs and VictoriaMetrics, removes the Claude telemetry
-containers, and prints the commands that finish the job, without running them:
+It asks for confirmation, stops mactop, sysmon-procs, claude-limits and VictoriaMetrics,
+removes the Claude telemetry containers, and prints the commands that finish the job,
+without running them:
 
     rm -rf ~/code/sysmon
     nix store gc

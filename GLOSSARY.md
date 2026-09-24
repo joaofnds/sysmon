@@ -35,3 +35,12 @@ in watts.
 cache write stores a prompt prefix at a premium, and a cache read reuses it at a
 fraction of the input price. Claude Code's telemetry calls a cache write cache
 creation.
+
+**Session limit**: the cap on how much of the Claude plan can be used in one five-hour
+session. It resets when the session ends.
+
+**Weekly limit**: the cap on how much of the Claude plan all models together can use in
+a week.
+
+**Per-model weekly limit**: a weekly cap of its own on one model, such as Fable, beside the
+weekly limit that covers all models.

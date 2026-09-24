@@ -8,3 +8,6 @@ scrape_configs:
   - job_name: sysmon-procs
     static_configs:
       - targets: ["127.0.0.1:2113"]
+  - job_name: claude-limits
+    static_configs:
+      - targets: ["127.0.0.1:2114"]

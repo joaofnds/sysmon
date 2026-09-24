@@ -5,6 +5,7 @@ set -eu
 RETENTION=90d
 MACTOP_PORT=2112
 PROCS_ADDR=127.0.0.1:2113
+LIMITS_ADDR=127.0.0.1:2114
 VM_ADDR=127.0.0.1:8428
 
 fail() {
@@ -33,11 +34,15 @@ procs_has_sample() {
   curl -sf --max-time 2 "http://$PROCS_ADDR/metrics" >/dev/null
 }
 
+limits_listening() {
+  curl -s --max-time 2 -o /dev/null "http://$LIMITS_ADDR/metrics"
+}
+
 vm_healthy() {
   curl -s --max-time 2 "http://$VM_ADDR/health" | grep -q OK
 }
 
-for svc in mactop sysmon-procs victoria-metrics; do
+for svc in mactop sysmon-procs claude-limits victoria-metrics; do
   if pid=$(pid_of "$svc"); then
     echo "start: $svc is already running (pid $pid)" >&2
     exit 1
@@ -52,6 +57,7 @@ seconds=${interval%s}
 
 nix build .#mactop --out-link result-mactop
 nix build .#sysmon-procs --out-link result-sysmon-procs
+nix build .#claude-limits --out-link result-claude-limits
 nix build .#victoriametrics --out-link result-victoriametrics
 mkdir -p data logs run
 
@@ -66,6 +72,12 @@ nohup ./result-sysmon-procs/bin/sysmon-procs -listen "$PROCS_ADDR" -interval "$i
 echo $! >run/sysmon-procs.pid
 echo "sysmon-procs started (pid $!), waiting for its first sample"
 wait_until sysmon-procs $((seconds + 30)) procs_has_sample
+
+nohup ./result-claude-limits/bin/claude-limits -listen "$LIMITS_ADDR" \
+  >/dev/null 2>>logs/claude-limits.log &
+echo $! >run/claude-limits.pid
+echo "claude-limits started (pid $!)"
+wait_until claude-limits 10 limits_listening
 
 nohup ./result-victoriametrics/bin/victoria-metrics \
   -httpListenAddr="$VM_ADDR" \

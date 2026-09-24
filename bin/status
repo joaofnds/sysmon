@@ -2,7 +2,7 @@
 set -u
 . "$(dirname "$0")/../lib.sh"
 
-for svc in mactop sysmon-procs victoria-metrics; do
+for svc in mactop sysmon-procs claude-limits victoria-metrics; do
   if pid=$(pid_of "$svc"); then
     ps -p "$pid" -o %cpu=,rss= |
       awk -v svc="$svc" -v pid="$pid" '{ printf "%-17s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
