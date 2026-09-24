@@ -268,7 +268,7 @@
         "w": 3,
         "h": 6
       },
-      "description": "macOS thermal pressure. Above Nominal, the system throttles the CPU and GPU.",
+      "description": "macOS thermal pressure. Only Critical means heat is cutting the system's performance. Fair and Serious ask apps to cut back first.",
       "targets": [
         {
           "refId": "A",

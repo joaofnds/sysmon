@@ -32,8 +32,8 @@ biggest apps of each against mactop's whole-machine line, and Inside $app splits
 picked at the top into its processes. The app picker starts on the app using the most
 memory.
 
-An app is the `.app` bundle a process runs from, so Brave's helpers count as Brave Browser.
-A process outside any bundle is its own app. Its limits:
+An app is the outermost `.app` bundle a process runs from, so Brave's helpers count as
+Brave Browser. Processes outside any bundle group by executable name. Its limits:
 
 - WebKit's shared services (`com.apple.WebKit.WebContent`, `com.apple.WebKit.GPU`) sit
   outside Safari's and Mail's bundles, so they show under their own names.
