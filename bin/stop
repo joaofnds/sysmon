@@ -2,7 +2,7 @@
 set -u
 . "$(dirname "$0")/../lib.sh"
 
-for svc in victoria-metrics mactop; do
+for svc in victoria-metrics sysmon-procs mactop; do
   if pid=$(pid_of "$svc"); then
     kill "$pid"
     seconds=30

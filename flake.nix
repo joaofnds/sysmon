@@ -1,5 +1,5 @@
 {
-  description = "Local Mac system monitoring: mactop scraped by VictoriaMetrics";
+  description = "Local Mac system monitoring: mactop and per-app usage scraped by VictoriaMetrics";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -13,15 +13,22 @@
             --replace-fail 'http.ListenAndServe(":"+port' 'http.ListenAndServe("127.0.0.1:"+port'
         '';
       });
+
+      sysmon-procs = pkgs.buildGoModule {
+        pname = "sysmon-procs";
+        version = "0";
+        src = ./procs;
+        vendorHash = null;
+      };
     in
     {
       packages.aarch64-darwin = {
-        inherit mactop;
+        inherit mactop sysmon-procs;
         inherit (pkgs) victoriametrics;
       };
 
       devShells.aarch64-darwin.default = pkgs.mkShellNoCC {
-        packages = [ mactop pkgs.victoriametrics ];
+        packages = [ mactop sysmon-procs pkgs.victoriametrics pkgs.go ];
       };
     };
 }

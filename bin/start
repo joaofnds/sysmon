@@ -4,6 +4,7 @@ set -eu
 
 RETENTION=90d
 MACTOP_PORT=2112
+PROCS_ADDR=127.0.0.1:2113
 VM_ADDR=127.0.0.1:8428
 
 fail() {
@@ -28,11 +29,15 @@ mactop_has_sample() {
     grep -q '^mactop_memory_gb{type="total"} [1-9]'
 }
 
+procs_has_sample() {
+  curl -sf --max-time 2 "http://$PROCS_ADDR/metrics" >/dev/null
+}
+
 vm_healthy() {
   curl -s --max-time 2 "http://$VM_ADDR/health" | grep -q OK
 }
 
-for svc in mactop victoria-metrics; do
+for svc in mactop sysmon-procs victoria-metrics; do
   if pid=$(pid_of "$svc"); then
     echo "start: $svc is already running (pid $pid)" >&2
     exit 1
@@ -46,6 +51,7 @@ esac
 seconds=${interval%s}
 
 nix build .#mactop --out-link result-mactop
+nix build .#sysmon-procs --out-link result-sysmon-procs
 nix build .#victoriametrics --out-link result-victoriametrics
 mkdir -p data logs run
 
@@ -54,6 +60,12 @@ nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((seconds * 1
 echo $! >run/mactop.pid
 echo "mactop started (pid $!), waiting for its first sample"
 wait_until mactop $((seconds * 3 + 30)) mactop_has_sample
+
+nohup ./result-sysmon-procs/bin/sysmon-procs -listen "$PROCS_ADDR" -interval "$interval" \
+  >/dev/null 2>>logs/sysmon-procs.log &
+echo $! >run/sysmon-procs.pid
+echo "sysmon-procs started (pid $!), waiting for its first sample"
+wait_until sysmon-procs $((seconds + 30)) procs_has_sample
 
 nohup ./result-victoriametrics/bin/victoria-metrics \
   -httpListenAddr="$VM_ADDR" \

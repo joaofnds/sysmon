@@ -2,21 +2,23 @@
 
 A local monitor for this Mac. [mactop](https://github.com/metaspartan/mactop) samples CPU,
 GPU, power, temperatures, memory, network, disk and battery, and exposes them as Prometheus
-metrics. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes and stores
-them, and Grafana charts them.
+metrics. `sysmon-procs`, a small collector in `procs/`, measures the same resources for each
+app. Single-node [VictoriaMetrics](https://victoriametrics.com) scrapes and stores both, and
+Grafana charts them.
 
-Nix provides both programs, pinned by `flake.lock`. Neither is installed system-wide, and
-both run only between `bin/start` and `bin/stop`.
+Nix provides all three programs, pinned by `flake.lock`. None is installed system-wide, and
+they run only between `bin/start` and `bin/stop`.
 
 Beside them, a Docker Compose stack records Claude Code's telemetry in ClickHouse and charts
 it in Grafana. That stack does start on its own, with OrbStack. See Claude telemetry below.
 
 ## Use
 
-    bin/start     # starts mactop, waits for its first sample, then VictoriaMetrics
-    bin/status    # running or not, PIDs, CPU% and RSS, scrape target health, data size,
-                  # and the state of each Claude telemetry container
-    bin/stop      # stops both and removes their PID files
+    bin/start     # starts mactop and sysmon-procs, waits for their first samples,
+                  # then VictoriaMetrics
+    bin/status    # running or not, PIDs, CPU% and RSS, the health of each scrape target,
+                  # data size, and the state of each Claude telemetry container
+    bin/stop      # stops all three and removes their PID files
 
 Dashboard: http://localhost:3030/d/mac-system. It is served by the Grafana of the Claude
 telemetry stack below, which reads VictoriaMetrics through `host.docker.internal:8428`, so
@@ -24,11 +26,32 @@ it shows data only while `bin/start` is running. Hover any chart and every other
 marks the same moment, which lines up a load spike with the power, heat and fan speed it
 caused. For ad hoc queries, VictoriaMetrics has its own UI at http://127.0.0.1:8428/vmui.
 
+The top of the dashboard is the whole machine. Below it, Top apps now ranks apps by CPU,
+memory, network, disk, GPU and energy over the last minute, Apps over time stacks the eight
+biggest apps of each against mactop's whole-machine line, and Inside $app splits the app
+picked at the top into its processes. The app picker starts on the app using the most
+memory.
+
+An app is the `.app` bundle a process runs from, so Brave's helpers count as Brave Browser.
+A process outside any bundle is its own app. Its limits:
+
+- WebKit's shared services (`com.apple.WebKit.WebContent`, `com.apple.WebKit.GPU`) sit
+  outside Safari's and Mail's bundles, so they show under their own names.
+- Disk and energy cover only this user's processes. macOS does not report them for
+  processes of other users without root.
+- Network counts external interfaces only, as mactop does, so traffic between local
+  processes, VictoriaMetrics scraping included, is left out.
+- Memory is resident memory, which counts shared pages once for each process that maps
+  them, so the apps add up to more than the machine's used memory.
+- The kernel's own CPU time belongs to no app, which is most of the gap between the apps
+  and mactop's whole-machine CPU line.
+
 mactop 2.1.5 reads CPU, DRAM and Neural Engine power and DRAM bandwidth as zero on this
 M5 Pro, so the dashboard charts only whole-machine and GPU power, and leaves out the
 samples where those readings spike and the occasional impossible network sample.
 
-Both listen on 127.0.0.1 only: mactop on port 2112, VictoriaMetrics on 8428.
+All three listen on 127.0.0.1 only: mactop on port 2112, sysmon-procs on 2113,
+VictoriaMetrics on 8428.
 
 ## Claude telemetry
 
@@ -84,9 +107,10 @@ collector.
 | Path | Contents |
 |---|---|
 | `data/` | VictoriaMetrics storage |
-| `logs/` | stderr of mactop and VictoriaMetrics |
+| `logs/` | stderr of mactop, sysmon-procs and VictoriaMetrics |
 | `run/` | PID files |
-| `result-mactop`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
+| `result-mactop`, `result-sysmon-procs`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
+| `procs/` | Source of `sysmon-procs`, the per-app collector |
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
 | `compose.yaml` | The Claude telemetry stack |
@@ -95,8 +119,8 @@ collector.
 | `schema.sql` | Claude telemetry retention and query views |
 | `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
 
-The two `result-*` links are Nix GC roots: `nix store gc` keeps both packages while the
-links exist.
+The `result-*` links are Nix GC roots: `nix store gc` keeps the packages while the links
+exist.
 
 mactop comes from nixpkgs with one patch in `flake.nix`. Upstream mactop listens on every
 network interface and has no option to change that, so the patch binds its metrics server
@@ -109,14 +133,14 @@ Retention: edit `RETENTION` at the top of `bin/start` (for example `30d`, `1y`),
 
 Scrape interval: edit `scrape_interval` in `scrape.yml`, in whole seconds (for example
 `30s`), then `bin/stop && bin/start`. `bin/start` sets mactop's sampling interval from the
-same value, so mactop never samples faster than it is scraped. mactop needs about two
+same value, so neither collector samples faster than it is scraped. mactop needs about two
 intervals to produce its first sample, so a longer interval makes `bin/start` wait longer.
 
 ## Uninstall
 
     bin/uninstall
 
-It asks for confirmation, stops mactop and VictoriaMetrics, removes the Claude telemetry
+It asks for confirmation, stops mactop, sysmon-procs and VictoriaMetrics, removes the Claude telemetry
 containers, and prints the commands that finish the job, without running them:
 
     rm -rf ~/code/sysmon

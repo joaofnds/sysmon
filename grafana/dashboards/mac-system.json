@@ -4,6 +4,26 @@
   "tags": [
     "mactop"
   ],
+  "templating": {
+    "list": [
+      {
+        "name": "app",
+        "label": "App",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "victoriametrics"
+        },
+        "query": "query_result(sort_desc(sum by (app) (sysmon_process_resident_bytes)))",
+        "definition": "query_result(sort_desc(sum by (app) (sysmon_process_resident_bytes)))",
+        "regex": "/app=\"([^\"]+)\"/",
+        "refresh": 2,
+        "sort": 0,
+        "includeAll": false,
+        "multi": false
+      }
+    ]
+  },
   "graphTooltip": 1,
   "time": {
     "from": "now-1h",
@@ -1043,7 +1063,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 15,
+        "y": 69,
         "w": 24,
         "h": 1
       },
@@ -1059,7 +1079,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 16,
+        "y": 70,
         "w": 9,
         "h": 8
       },
@@ -1180,7 +1200,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 16,
+        "y": 70,
         "w": 5,
         "h": 8
       },
@@ -1257,7 +1277,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 16,
+        "y": 70,
         "w": 10,
         "h": 8
       },
@@ -1309,7 +1329,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 24,
+        "y": 78,
         "w": 24,
         "h": 1
       },
@@ -1325,7 +1345,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 25,
+        "y": 79,
         "w": 12,
         "h": 8
       },
@@ -1447,7 +1467,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 25,
+        "y": 79,
         "w": 12,
         "h": 8
       },
@@ -1542,7 +1562,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 33,
+        "y": 87,
         "w": 24,
         "h": 1
       },
@@ -1558,7 +1578,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 88,
         "w": 12,
         "h": 8
       },
@@ -1667,7 +1687,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 34,
+        "y": 88,
         "w": 12,
         "h": 8
       },
@@ -1774,7 +1794,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 42,
+        "y": 96,
         "w": 24,
         "h": 1
       },
@@ -1790,7 +1810,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 43,
+        "y": 97,
         "w": 12,
         "h": 8
       },
@@ -1897,7 +1917,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 43,
+        "y": 97,
         "w": 6,
         "h": 8
       },
@@ -2004,7 +2024,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 43,
+        "y": 97,
         "w": 6,
         "h": 8
       },
@@ -2108,7 +2128,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 105,
         "w": 24,
         "h": 1
       },
@@ -2124,7 +2144,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 52,
+        "y": 106,
         "w": 12,
         "h": 8
       },
@@ -2224,7 +2244,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 52,
+        "y": 106,
         "w": 6,
         "h": 8
       },
@@ -2279,7 +2299,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 52,
+        "y": 106,
         "w": 6,
         "h": 8
       },
@@ -2362,7 +2382,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 60,
+        "y": 114,
         "w": 24,
         "h": 1
       },
@@ -2378,7 +2398,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 61,
+        "y": 115,
         "w": 24,
         "h": 6
       },
@@ -2475,6 +2495,1411 @@
           "sort": "desc"
         }
       }
+    },
+    {
+      "id": 35,
+      "type": "row",
+      "title": "Top apps now",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 36,
+      "type": "table",
+      "title": "CPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_cpu_seconds_total[1m])) * 100) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "100% is one core fully busy, as in Activity Monitor.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "type": "table",
+      "title": "Memory",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 16,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (sysmon_process_resident_bytes)) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Resident memory of each app's processes. Memory shared between processes counts once for each of them.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "type": "table",
+      "title": "Network",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 16,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_network_received_bytes_total[1m]) + rate(sysmon_process_network_sent_bytes_total[1m]))) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "cyan"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Received plus sent, on external interfaces.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "type": "table",
+      "title": "Disk",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_disk_read_bytes_total[1m]) + rate(sysmon_process_disk_written_bytes_total[1m]))) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "yellow"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Read plus written. Only processes running as you: macOS does not let other users read the counters of system daemons.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "type": "table",
+      "title": "GPU",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 25,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_gpu_seconds_total[1m])) * 100) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Share of GPU time.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "type": "table",
+      "title": "Energy",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 25,
+        "w": 8,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_energy_joules_total[1m]))) > 0))",
+          "legendFormat": "{{app}}",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "min": 0,
+          "decimals": 1,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "gauge",
+              "mode": "basic",
+              "valueDisplayMode": "text"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "app"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 190
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "description": "macOS's own estimate of each app's power draw. Only processes running as you: macOS does not let other users read the counters of system daemons.",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "app": 0,
+              "Value": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "type": "row",
+      "title": "Apps over time",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 43,
+      "type": "timeseries",
+      "title": "CPU by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (rate(sysmon_process_cpu_seconds_total[$__rate_interval])) * 100, \"app=Other\")",
+          "legendFormat": "{{app}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_cpu_usage_percent * scalar(count(mactop_cpu_core_usage_percent))",
+          "legendFormat": "All CPU (mactop)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "All CPU (mactop)"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "100% is one core fully busy, as in Activity Monitor. The dashed line is all CPU time mactop measured, and the gap above the stack is mostly the kernel. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 44,
+      "type": "timeseries",
+      "title": "Memory by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 36,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (sysmon_process_resident_bytes), \"app=Other\")",
+          "legendFormat": "{{app}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": null
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Resident memory. Memory shared between processes counts once for each of them, so the stack is larger than the memory in use. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 45,
+      "type": "timeseries",
+      "title": "Network by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (rate(sysmon_process_network_received_bytes_total[$__rate_interval]) + rate(sysmon_process_network_sent_bytes_total[$__rate_interval])), \"app=Other\")",
+          "legendFormat": "{{app}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum((mactop_network_kbytes_per_sec{direction=\"download\"} < 1e7) * 1024 + ignoring(direction) (mactop_network_kbytes_per_sec{direction=\"upload\"} < 1e7) * 1024)",
+          "legendFormat": "All traffic (mactop)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "All traffic (mactop)"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Received plus sent on external interfaces. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 46,
+      "type": "timeseries",
+      "title": "Disk by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (rate(sysmon_process_disk_read_bytes_total[$__rate_interval]) + rate(sysmon_process_disk_written_bytes_total[$__rate_interval])), \"app=Other\")",
+          "legendFormat": "{{app}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_disk_kbytes_per_sec{operation=\"read\"} * 1024 + ignoring(operation) mactop_disk_kbytes_per_sec{operation=\"write\"} * 1024",
+          "legendFormat": "All disk I/O (mactop)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "All disk I/O (mactop)"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Read plus written. The gap under the dashed line is system daemons. Only processes running as you: macOS does not let other users read the counters of system daemons. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 47,
+      "type": "timeseries",
+      "title": "GPU by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (rate(sysmon_process_gpu_seconds_total[$__rate_interval])) * 100, \"app=Other\")",
+          "legendFormat": "{{app}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "mactop_gpu_usage_percent",
+          "legendFormat": "GPU busy (mactop)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU busy (mactop)"
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Share of GPU time, from each app's GPU clients. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 48,
+      "type": "timeseries",
+      "title": "Energy by app",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 52,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "topk_avg(8, sum by (app) (rate(sysmon_process_energy_joules_total[$__rate_interval])), \"app=Other\")",
+          "legendFormat": "{{app}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": null
+            },
+            "properties": [
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Other"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#808080"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "macOS's estimate of each app's power draw. It leaves out the display, the rest of the hardware and system daemons, which the Power chart above includes. Only processes running as you: macOS does not let other users read the counters of system daemons. Apps outside the 8 busiest over the time range are summed as Other."
+    },
+    {
+      "id": 49,
+      "type": "row",
+      "title": "Inside $app",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 60,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 50,
+      "type": "timeseries",
+      "title": "CPU by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 61,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_cpu_seconds_total{app=\"$app\"}[$__rate_interval])) * 100",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "100% is one core fully busy, as in Activity Monitor. Pick the app in the menu at the top."
+    },
+    {
+      "id": 51,
+      "type": "timeseries",
+      "title": "Memory by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 61,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_resident_bytes{app=\"$app\"})",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Resident memory. Pick the app in the menu at the top."
     }
   ]
 }
