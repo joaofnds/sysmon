@@ -2,7 +2,8 @@
 set -eu
 . "$(dirname "$0")/../lib.sh"
 
-URL=http://localhost:3030
+PORT=3030
+URL=http://localhost:$PORT
 
 fail() {
   echo "grafana: $*" >&2
@@ -22,6 +23,12 @@ fi
 
 if ! agent_gone grafana; then
   bin/grafana-off
+fi
+
+if nc -z -G 2 127.0.0.1 "$PORT" 2>/dev/null; then
+  echo "grafana: port $PORT is taken by" >&2
+  netstat -anv -p tcp | awk -v port="$PORT" '$6 == "LISTEN" && $4 ~ "[.]" port "$" { print "  " $11 }' >&2
+  exit 1
 fi
 
 nix build .#grafana --out-link result-grafana
@@ -45,7 +52,7 @@ write_agent "$ROOT/run" grafana /usr/bin/env \
   GF_AUTH_DISABLE_LOGIN=true \
   GF_AUTH_BASIC_ENABLED=false \
   GF_SERVER_HTTP_ADDR=127.0.0.1 \
-  GF_SERVER_HTTP_PORT=3030 \
+  GF_SERVER_HTTP_PORT="$PORT" \
   GF_SERVER_DOMAIN=localhost \
   GF_SERVER_ENFORCE_DOMAIN=true \
   GF_SERVER_ROOT_URL="$URL/" \
