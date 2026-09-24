@@ -36,11 +36,15 @@ cache write stores a prompt prefix at a premium, and a cache read reuses it at a
 fraction of the input price. Claude Code's telemetry calls a cache write cache
 creation.
 
+**Five-hour session**: the window the Claude plan counts its session limit over. It is not a
+Claude Code session: one Claude Code session can span several five-hour sessions, and several
+Claude Code sessions can share one.
+
 **Session limit**: the cap on how much of the Claude plan can be used in one five-hour
-session. It resets when the session ends.
+session. It resets when that five-hour session ends.
 
 **Weekly limit**: the cap on how much of the Claude plan all models together can use in
 a week.
 
-**Per-model weekly limit**: a weekly cap of its own on one model, such as Fable, beside the
-weekly limit that covers all models.
+**Scoped weekly limit**: a weekly cap of its own on one model, such as Fable, or on one
+surface, a product Claude is used through, beside the weekly limit that covers all models.

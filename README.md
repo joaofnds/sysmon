@@ -71,22 +71,29 @@ claude-limits on 2114, VictoriaMetrics on 8428.
 
 ## Claude plan limits
 
-`claude-limits` reads how much of the Claude plan's session limit, weekly limit and
-per-model weekly limits is used, and when each resets. It asks every five minutes, from the
-same endpoint Claude Code's `/usage` reads, `https://api.anthropic.com/api/oauth/usage`.
-Anthropic does not document that endpoint, so it can change or go away without notice.
+`claude-limits` reads how much of the Claude plan's five-hour session limit, its weekly
+limit, and the weekly limits that cover one model or one surface is used, and when each
+resets. It asks every five minutes, from the same endpoint Claude Code's `/usage` reads,
+`https://api.anthropic.com/api/oauth/usage`. Anthropic does not document that endpoint, so
+it can change or go away without notice. A learning test checks how the collector reads it
+against the real endpoint, signed in with this Mac's login:
+
+    cd claude-limits && nix shell nixpkgs#go -c go test -tags learning -run TestUsageAPILearning .
 
 The Plan limits row of the Claude usage dashboard, http://localhost:3030/d/claude-usage,
 charts them. It reads VictoriaMetrics, so that row is blank while `bin/start` is not
 running. Its even pace line is how much of a limit would be used by now if the whole limit
-were spread evenly up to the reset, so use above that line runs out before the reset.
+were spread evenly up to the reset, so use above that line runs out before the reset if it
+keeps its average rate so far.
 
 It signs in with the Claude.ai login that Claude Code keeps in the Keychain item
 `Claude Code-credentials`, read again before every request, and it never refreshes that login.
+That item is in the login Keychain of the user signed in at the Mac, so `claude-limits` has
+to run as that user, with that Keychain unlocked as it is after they sign in.
 When a read fails, for example because the login expired and Claude Code has not refreshed
-it yet, `/metrics` answers 503 until the next read succeeds. VictoriaMetrics then marks the
-target down, `bin/status` shows it, the charts leave a gap rather than repeat an old
-reading, and `logs/claude-limits.log` says why.
+it yet, `/metrics` answers 503 until a read succeeds again, five minutes later at the
+earliest. VictoriaMetrics then marks the target down, `bin/status` shows it, the charts
+leave a gap rather than repeat an old reading, and `logs/claude-limits.log` says why.
 
 ## Claude telemetry
 
@@ -169,9 +176,11 @@ Retention: edit `RETENTION` at the top of `bin/start` (for example `30d`, `1y`),
 `bin/stop && bin/start`. VictoriaMetrics deletes data older than the new period.
 
 Scrape interval: edit `scrape_interval` in `scrape.yml`, in whole seconds (for example
-`30s`), then `bin/stop && bin/start`. `bin/start` sets mactop's sampling interval from the
-same value, so neither collector samples faster than it is scraped. mactop needs about two
-intervals to produce its first sample, so a longer interval makes `bin/start` wait longer.
+`30s`), then `bin/stop && bin/start`. `bin/start` sets the sampling interval of mactop and
+sysmon-procs from the same value, so neither samples faster than it is scraped.
+`claude-limits` ignores it and asks every five minutes, the default of its `-interval` flag,
+to keep its load on Anthropic's endpoint low. mactop needs about two intervals to produce
+its first sample, so a longer interval makes `bin/start` wait longer.
 
 ## Uninstall
 
