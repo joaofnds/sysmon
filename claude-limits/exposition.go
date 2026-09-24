@@ -27,5 +27,6 @@ func writeMetrics(w io.Writer, limits []limit) {
 var labelEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\n", `\n`)
 
 func labels(l limit) string {
-	return fmt.Sprintf(`{limit="%s",model="%s"}`, labelEscaper.Replace(l.Kind), labelEscaper.Replace(l.Model))
+	return fmt.Sprintf(`{limit="%s",model="%s",surface="%s"}`,
+		labelEscaper.Replace(l.Kind), labelEscaper.Replace(l.Model), labelEscaper.Replace(l.Surface))
 }

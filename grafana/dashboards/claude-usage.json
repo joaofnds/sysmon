@@ -375,7 +375,7 @@
             "uid": "victoriametrics"
           },
           "expr": "claude_limit_used_percent{limit=\"weekly_scoped\"}",
-          "legendFormat": "Weekly, {{model}}",
+          "legendFormat": "Weekly, {{model}}{{surface}}",
           "instant": true,
           "range": false
         }
@@ -472,7 +472,7 @@
             "uid": "victoriametrics"
           },
           "expr": "claude_limit_reset_timestamp_seconds{limit=\"weekly_scoped\"} - time()",
-          "legendFormat": "Weekly, {{model}}",
+          "legendFormat": "Weekly, {{model}}{{surface}}",
           "instant": true,
           "range": false
         }
@@ -624,7 +624,7 @@
             "uid": "victoriametrics"
           },
           "expr": "claude_limit_used_percent{limit=\"weekly_scoped\"}",
-          "legendFormat": "{{model}}"
+          "legendFormat": "{{model}}{{surface}}"
         },
         {
           "refId": "C",

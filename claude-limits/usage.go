@@ -10,10 +10,12 @@ import (
 var errNoLimits = errors.New("the usage response has no limits")
 
 // A limit is one share of the plan's usage that Anthropic caps and resets on a schedule:
-// the session limit, the weekly limit across all models, or the weekly limit of one model.
+// the session limit, the weekly limit across all models, or the weekly limit of one model
+// or one surface.
 type limit struct {
 	Kind        string
 	Model       string
+	Surface     string
 	UsedPercent float64
 	ResetsAt    time.Time
 }
@@ -24,11 +26,14 @@ type usageResponse struct {
 		Percent  float64    `json:"percent"`
 		ResetsAt *time.Time `json:"resets_at"`
 		Scope    *struct {
-			Model *struct {
-				DisplayName string `json:"display_name"`
-			} `json:"model"`
+			Model   *scopeName `json:"model"`
+			Surface *scopeName `json:"surface"`
 		} `json:"scope"`
 	} `json:"limits"`
+}
+
+type scopeName struct {
+	DisplayName string `json:"display_name"`
 }
 
 func parseLimits(body []byte) ([]limit, error) {
@@ -48,6 +53,9 @@ func parseLimits(body []byte) ([]limit, error) {
 		}
 		if l.Scope != nil && l.Scope.Model != nil {
 			parsed.Model = l.Scope.Model.DisplayName
+		}
+		if l.Scope != nil && l.Scope.Surface != nil {
+			parsed.Surface = l.Scope.Surface.DisplayName
 		}
 		limits = append(limits, parsed)
 	}

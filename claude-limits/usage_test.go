@@ -37,6 +37,22 @@ func TestParseLimits(t *testing.T) {
 		}
 	})
 
+	t.Run("when a limit is scoped to a surface", func(t *testing.T) {
+		t.Run("reads the surface", func(t *testing.T) {
+			body := `{"limits": [{"kind": "weekly_scoped", "percent": 4, "resets_at": null,
+			  "scope": {"model": null, "surface": {"display_name": "Claude Code"}}}]}`
+
+			limits, err := parseLimits([]byte(body))
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			if want := []limit{{Kind: "weekly_scoped", Surface: "Claude Code", UsedPercent: 4}}; !reflect.DeepEqual(limits, want) {
+				t.Fatalf("got %+v, want %+v", limits, want)
+			}
+		})
+	})
+
 	t.Run("leaves the reset time zero when the limit has none", func(t *testing.T) {
 		body := `{"limits": [{"kind": "session", "percent": 0, "resets_at": null, "scope": null}]}`
 
