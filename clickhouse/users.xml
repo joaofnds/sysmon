@@ -10,7 +10,7 @@
     </quotas>
     <users>
         <otel>
-            <password>otel</password>
+            <password_sha256_hex from_env="SYSMON_OTEL_PASSWORD_SHA256"/>
             <profile>default</profile>
             <quota>default</quota>
             <networks>
@@ -22,7 +22,7 @@
             </grants>
         </otel>
         <grafana>
-            <password>grafana</password>
+            <password_sha256_hex from_env="SYSMON_GRAFANA_PASSWORD_SHA256"/>
             <profile>grafana</profile>
             <quota>default</quota>
             <networks>

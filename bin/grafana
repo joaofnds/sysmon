@@ -12,7 +12,9 @@ fi
 
 nix build .#grafana --out-link result-grafana
 nix build .#grafana-plugins --out-link result-grafana-plugins
-mkdir -p grafana-data logs run grafana/provisioning/plugins grafana/provisioning/alerting
+private_dir grafana-data logs run
+mkdir -p grafana/provisioning/plugins grafana/provisioning/alerting
+secret clickhouse-grafana >/dev/null
 
 (
   for _ in $(seq 60); do

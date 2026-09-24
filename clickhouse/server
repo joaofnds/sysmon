@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+. "$(dirname "$0")/../lib.sh"
+
+password_sha256() {
+  password=$(secret "$1") || return 1
+  printf %s "$password" | shasum -a 256 | cut -d' ' -f1
+}
+
+SYSMON_OTEL_PASSWORD_SHA256=$(password_sha256 clickhouse-otel)
+SYSMON_GRAFANA_PASSWORD_SHA256=$(password_sha256 clickhouse-grafana)
+# Without the watchdog variable, ClickHouse forks and launchd supervises the watchdog.
+CLICKHOUSE_WATCHDOG_ENABLE=0
+export SYSMON_OTEL_PASSWORD_SHA256 SYSMON_GRAFANA_PASSWORD_SHA256 CLICKHOUSE_WATCHDOG_ENABLE
+
+exec "$ROOT/result-clickhouse/bin/clickhouse" server \
+  --config-file="$ROOT/clickhouse/config.xml" -- --path="$ROOT/clickhouse-data/"

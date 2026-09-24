@@ -59,7 +59,7 @@ nix build .#mactop --out-link result-mactop
 nix build .#sysmon-procs --out-link result-sysmon-procs
 nix build .#claude-limits --out-link result-claude-limits
 nix build .#victoriametrics --out-link result-victoriametrics
-mkdir -p data logs run
+private_dir data logs run
 
 nohup ./result-mactop/bin/mactop --headless -p "$MACTOP_PORT" -i "$((seconds * 1000))" \
   >/dev/null 2>>logs/mactop.log &

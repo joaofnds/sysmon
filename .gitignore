@@ -5,3 +5,4 @@ result-*
 clickhouse-data/
 grafana-data/
 clickhouse/*-preprocessed.xml
+secrets/

@@ -11,7 +11,7 @@ fail() {
 }
 
 query() {
-  "$CLICKHOUSE" client --port 9327 -u otel --password otel "$@"
+  CLICKHOUSE_PASSWORD=$OTEL_PASSWORD "$CLICKHOUSE" client --port 9327 -u otel "$@"
 }
 
 wait_until() {
@@ -76,16 +76,16 @@ EOF
 
 nix build .#clickhouse --out-link result-clickhouse
 nix build .#otelcol-contrib --out-link result-otelcol-contrib
-mkdir -p clickhouse-data logs "$LAUNCH_AGENTS"
+private_dir clickhouse-data logs
+mkdir -p "$LAUNCH_AGENTS"
+OTEL_PASSWORD=$(secret clickhouse-otel)
 
 for name in $TELEMETRY_AGENTS; do
   launchctl bootout "$LAUNCHD_DOMAIN/sysmon.$name" 2>/dev/null || true
   wait_until "sysmon.$name to unload" 30 agent_gone "$name"
 done
 
-# Without the watchdog variable, ClickHouse forks and launchd supervises the watchdog.
-write_agent clickhouse /usr/bin/env CLICKHOUSE_WATCHDOG_ENABLE=0 "$CLICKHOUSE" server \
-  --config-file="$ROOT/clickhouse/config.xml" -- --path="$ROOT/clickhouse-data/"
+write_agent clickhouse "$ROOT/clickhouse/server"
 write_agent otelcol "$ROOT/result-otelcol-contrib/bin/otelcol-contrib" \
   --config="$ROOT/otelcol.yaml"
 

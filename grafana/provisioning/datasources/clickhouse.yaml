@@ -12,4 +12,4 @@ datasources:
       username: grafana
       defaultDatabase: otel
     secureJsonData:
-      password: grafana
+      password: $__file{secrets/clickhouse-grafana}

@@ -9,7 +9,7 @@ exporters:
     endpoint: tcp://127.0.0.1:9327
     database: otel
     username: otel
-    password: otel
+    password: ${file:secrets/clickhouse-otel}
     create_schema: true
 
 service:

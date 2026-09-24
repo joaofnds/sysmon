@@ -128,7 +128,7 @@ off that list before adding a datasource of its kind.
 
 The collected events live in `clickhouse-data/`. To query them:
 
-    ~/code/sysmon/result-clickhouse/bin/clickhouse client --port 9327 -u otel --password otel -d otel
+    CLICKHOUSE_PASSWORD=$(cat secrets/clickhouse-otel) result-clickhouse/bin/clickhouse client --port 9327 -u otel -d otel
 
 `clickhouse/config.xml` is a complete ClickHouse config rather than an override of a stock
 one, so it configures none of ClickHouse's own system log tables, which in the stock config
@@ -152,6 +152,13 @@ turns off its login form and basic auth, so every visitor is an anonymous Viewer
 neither open Explore nor add a datasource that logs in as `otel`. Run ad hoc queries with
 the command above.
 
+Both users log in with a password generated into `secrets/` the first time a script needs
+it. ClickHouse gets only a SHA-256 hash of each, which `clickhouse/server` computes from
+those files every time launchd starts ClickHouse, so no config file or launchd agent holds a
+password. The scripts refuse a password file that ends in a newline, because the collector
+would read the newline as part of the password. To change the passwords, delete `secrets/`,
+rerun `bin/telemetry-on`, and restart `bin/grafana`.
+
 Grafana, the collector and ClickHouse listen on 127.0.0.1 only. The collector listens on
 4327 rather than 4317 so it does not collide with an application's own OpenTelemetry
 collector.
@@ -165,6 +172,7 @@ collector.
 | `grafana-data/` | Grafana's own database |
 | `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics, and the output of ClickHouse and the collector. Grafana logs to the terminal running `bin/grafana` |
 | `run/` | PID files |
+| `secrets/` | The generated passwords of the `otel` and `grafana` ClickHouse users |
 | `result-mactop`, `result-sysmon-procs`, `result-claude-limits`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
 | `result-clickhouse`, `result-otelcol-contrib` | Links to the Nix store paths `bin/telemetry-on` runs |
 | `result-grafana`, `result-grafana-plugins` | Links to the Grafana build and its ClickHouse plugin, which `bin/grafana` runs |
@@ -173,13 +181,17 @@ collector.
 | `scrape.yml` | Scrape configuration |
 | `flake.nix`, `flake.lock` | The pinned packages |
 | `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
-| `clickhouse/` | ClickHouse server settings, and its users: `otel` for the collector and the read-only `grafana` |
+| `clickhouse/` | ClickHouse server settings, its users (`otel` for the collector and the read-only `grafana`), and `server`, the script launchd starts ClickHouse with |
 | `schema.sql` | Claude telemetry retention and query views |
 | `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
 | `grafana/mac-system.py` | The script that writes the Mac system dashboard |
 
 The `result-*` links are Nix GC roots: `nix store gc` keeps the packages while the links
 exist.
+
+Only you can read `data/`, `clickhouse-data/`, `grafana-data/`, `logs/`, `run/` and
+`secrets/`: the scripts that create them set that mode again on every run, since a macOS
+home folder lets the other accounts in its `staff` group read into it.
 
 mactop comes from nixpkgs with one patch in `flake.nix`. Upstream mactop listens on every
 network interface and has no option to change that, so the patch binds its metrics server
