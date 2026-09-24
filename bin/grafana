@@ -4,10 +4,20 @@ set -eu
 
 URL=http://localhost:3030
 
-if pid=$(pid_of grafana); then
+fail() {
+  echo "grafana: $*" >&2
+  bin/grafana-off >&2
+  exit 1
+}
+
+if pid=$(agent_pid grafana); then
   echo "grafana is already running (pid $pid)"
   open "$URL"
   exit 0
+fi
+
+if ! agent_gone grafana; then
+  bin/grafana-off
 fi
 
 nix build .#grafana --out-link result-grafana
@@ -16,21 +26,7 @@ private_dir grafana-data logs run
 mkdir -p grafana/provisioning/plugins grafana/provisioning/alerting
 secret clickhouse-grafana >/dev/null
 
-(
-  for _ in $(seq 60); do
-    kill -0 "$$" 2>/dev/null || exit 0
-    if curl -sf --max-time 2 "$URL/api/health" >/dev/null; then
-      open "$URL"
-      exit 0
-    fi
-    sleep 1
-  done
-  echo "grafana: not ready in 60s" >&2
-) &
-
-echo $$ >run/grafana.pid
-echo "grafana starting at $URL, Ctrl-C stops it"
-exec env \
+write_agent "$ROOT/run" grafana /usr/bin/env \
   GF_PATHS_DATA="$ROOT/grafana-data" \
   GF_PATHS_LOGS="$ROOT/logs" \
   GF_PATHS_PLUGINS="$ROOT/result-grafana-plugins" \
@@ -50,4 +46,17 @@ exec env \
   GF_SERVER_ENFORCE_DOMAIN=true \
   GF_SERVER_ROOT_URL="$URL/" \
   GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH="$ROOT/grafana/dashboards/claude-usage.json" \
-  ./result-grafana/bin/grafana server --homepath "$ROOT/result-grafana"
+  "$ROOT/result-grafana/bin/grafana" server --homepath "$ROOT/result-grafana"
+
+launchctl bootstrap "$LAUNCHD_DOMAIN" "$ROOT/run/sysmon.grafana.plist" ||
+  fail "launchd refused sysmon.grafana"
+
+for _ in $(seq 60); do
+  if curl -sf --max-time 2 "$URL/api/health" >/dev/null; then
+    echo "grafana started at $URL (pid $(agent_pid grafana)), bin/grafana-off stops it"
+    open "$URL"
+    exit 0
+  fi
+  sleep 1
+done
+fail "not ready in 60s, see logs/grafana.log"

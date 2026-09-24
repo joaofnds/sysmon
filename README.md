@@ -13,18 +13,20 @@ only, and the scripts need Nix with flakes enabled.
 
 Beside them, an OpenTelemetry collector records Claude Code's telemetry in ClickHouse. Those
 two run under launchd and start again at login. Grafana charts both kinds of data and runs
-only while `bin/grafana` does. Nix pins these three as well. See Claude telemetry below.
+only from `bin/grafana` to `bin/grafana-off`. Nix pins these three as well. See Claude
+telemetry below.
 
 ## Use
 
-    bin/start     # starts mactop and sysmon-procs, waits for their first samples,
-                  # then claude-limits and VictoriaMetrics
-    bin/status    # running or not, PIDs, CPU% and RSS of every service, the health of
-                  # each scrape target, and the size of the metrics and telemetry data
-    bin/stop      # stops all four and removes their PID files
-    bin/grafana   # serves the dashboards until Ctrl-C and opens them in the browser
+    bin/start        # starts mactop and sysmon-procs, waits for their first samples,
+                     # then claude-limits and VictoriaMetrics
+    bin/status       # running or not, PIDs, CPU% and RSS of every service, the health of
+                     # each scrape target, and the size of the metrics and telemetry data
+    bin/stop         # stops all four and removes their PID files
+    bin/grafana      # starts Grafana in the background and opens the dashboards
+    bin/grafana-off  # stops Grafana
 
-Dashboard: http://localhost:3030/d/mac-system, while `bin/grafana` runs. It reads
+Dashboard: http://localhost:3030/d/mac-system, while Grafana runs. It reads
 VictoriaMetrics, so it shows data only while `bin/start` is running. Hover any chart and
 every other chart marks the same moment, which lines up a load spike with the power, heat
 and fan speed it caused. For ad hoc queries, VictoriaMetrics has its own UI at
@@ -130,13 +132,16 @@ launchd starts it again every ten seconds until ClickHouse does. Rerun `bin/tele
 after editing `otelcol.yaml`, `clickhouse/` or `schema.sql`, because the services read their
 files only when they start.
 
-Grafana runs only while `bin/grafana` does, and opens http://localhost:3030 once it answers.
-Its own state lives in `grafana-data/`, and its datasources and dashboards come from
-`grafana/`. The flake pins Grafana's official darwin-arm64 build and the ClickHouse
-datasource plugin by hash, so starting it compiles nothing and installs no plugin.
-Grafana runs each datasource plugin as a process of its own, so `bin/grafana` turns off the
-ones it bundles that no dashboard uses, through `GF_PLUGINS_DISABLE_PLUGINS`. Take a plugin
-off that list before adding a datasource of its kind.
+`bin/grafana` starts Grafana in the background, opens http://localhost:3030 once it answers,
+and returns. launchd runs it as `sysmon.grafana` and restarts it when it exits, until
+`bin/grafana-off` or logout, and it logs to `logs/grafana.log`. Its agent lives in `run/`
+rather than `~/Library/LaunchAgents`, so it does not start at login. Its own state lives in
+`grafana-data/`, and its datasources and dashboards come from `grafana/`. The flake pins
+Grafana's official darwin-arm64 build and the ClickHouse datasource plugin by hash, so
+starting it compiles nothing and installs no plugin. Grafana runs each datasource plugin as
+a process of its own, so `bin/grafana` turns off the ones it bundles that no dashboard uses,
+through `GF_PLUGINS_DISABLE_PLUGINS`. Take a plugin off that list before adding a datasource
+of its kind.
 
 The collected events live in `clickhouse-data/`. To query them:
 
@@ -169,7 +174,7 @@ it. ClickHouse gets only a SHA-256 hash of each, which `clickhouse/server` compu
 those files every time launchd starts ClickHouse, so no config file or launchd agent holds a
 password. The scripts refuse a password file that ends in a newline, because the collector
 would read the newline as part of the password. To change the passwords, delete `secrets/`,
-rerun `bin/telemetry-on`, and restart `bin/grafana`.
+rerun `bin/telemetry-on`, and restart Grafana with `bin/grafana-off && bin/grafana`.
 
 Grafana, the collector and ClickHouse listen on 127.0.0.1 only. The collector listens on
 4327 rather than 4317 so it does not collide with an application's own OpenTelemetry
@@ -182,8 +187,8 @@ collector.
 | `data/` | VictoriaMetrics storage |
 | `clickhouse-data/` | ClickHouse storage, holding the Claude telemetry events |
 | `grafana-data/` | Grafana's own database |
-| `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics, and the output of ClickHouse and the collector. Grafana logs to the terminal running `bin/grafana` |
-| `run/` | PID files |
+| `logs/` | stderr of mactop, sysmon-procs, claude-limits and VictoriaMetrics, and the output of ClickHouse, the collector and Grafana |
+| `run/` | PID files, and Grafana's launchd agent while it runs |
 | `secrets/` | The generated passwords of the `otel` and `grafana` ClickHouse users |
 | `result-mactop`, `result-sysmon-procs`, `result-claude-limits`, `result-victoriametrics` | Links to the Nix store paths `bin/start` runs |
 | `result-clickhouse`, `result-otelcol-contrib` | Links to the Nix store paths `bin/telemetry-on` runs |
@@ -225,9 +230,9 @@ its first sample, so a longer interval makes `bin/start` wait longer.
 
     bin/uninstall
 
-It asks for confirmation, stops every service, removes the launchd agents of ClickHouse and
-the collector, and prints the commands that finish the job, without running them. For a
-clone at `/path/to/sysmon` they are:
+It asks for confirmation, stops every service, removes the launchd agents of ClickHouse, the
+collector and Grafana, and prints the commands that finish the job, without running them.
+For a clone at `/path/to/sysmon` they are:
 
     rm -rf /path/to/sysmon
     nix store gc

@@ -11,10 +11,7 @@ esac
 
 bin/stop
 bin/telemetry-off
-if pid=$(pid_of grafana); then
-  kill "$pid"
-  echo "grafana stopped (pid $pid)"
-fi
+bin/grafana-off
 
 cat <<MSG
 
