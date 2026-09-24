@@ -16,6 +16,13 @@ func running(pid int, executable string, cpu float64) process {
 	return process{PID: pid, Executable: executable, Counters: c}
 }
 
+func holding(pid int, executable string, resident, threadCount float64) process {
+	p := running(pid, executable, 0)
+	p.Gauges = unreadGauges()
+	p.Gauges[residentBytes], p.Gauges[threads] = resident, threadCount
+	return p
+}
+
 func cpuOf(l *ledger, g group) float64 {
 	return l.Totals()[g][cpuSeconds]
 }
@@ -65,16 +72,14 @@ func TestLedger(t *testing.T) {
 		}
 	})
 
-	t.Run("reports resident memory and process count of running processes by app", func(t *testing.T) {
+	t.Run("sums what the running processes of each app hold, and counts them", func(t *testing.T) {
 		l := newLedger()
-		first, second := running(1, chrome, 0), running(2, chrome, 0)
-		first.ResidentBytes, second.ResidentBytes = 100, 20
 
-		l.Record([]process{first, second})
+		l.Record([]process{holding(1, chrome, 100, 7), holding(2, chrome, 20, 3)})
 
-		want := map[group]usage{chromeGroup: {ResidentBytes: 120, Processes: 2}}
-		if got := l.Usage(); !maps.Equal(got, want) {
-			t.Fatalf("got %v, want %v", got, want)
+		got := l.Usage()[chromeGroup]
+		if got.Gauges[residentBytes] != 120 || got.Gauges[threads] != 10 || got.Processes != 2 {
+			t.Fatalf("got %v", got)
 		}
 	})
 
@@ -128,14 +133,47 @@ func TestLedger(t *testing.T) {
 			}
 		})
 
-		t.Run("adds nothing for a process first seen without it", func(t *testing.T) {
+		t.Run("leaves it unread for an app none of whose processes were read", func(t *testing.T) {
 			l := newLedger()
 			l.Record(nil)
 
 			l.Record([]process{running(1, chrome, math.NaN())})
 
-			if got := cpuOf(l, chromeGroup); got != 0 {
-				t.Fatalf("got %v, want 0", got)
+			if got := cpuOf(l, chromeGroup); !math.IsNaN(got) {
+				t.Fatalf("got %v, want NaN", got)
+			}
+		})
+
+		t.Run("adds what the processes that were read used", func(t *testing.T) {
+			l := newLedger()
+			l.Record([]process{running(1, chrome, 10), running(2, chrome, 10), running(3, chrome, 10)})
+
+			l.Record([]process{running(1, chrome, 13), running(2, chrome, math.NaN()), running(3, chrome, 14)})
+
+			if got := cpuOf(l, chromeGroup); got != 7 {
+				t.Fatalf("got %v, want 7", got)
+			}
+		})
+	})
+
+	t.Run("when a gauge was not read", func(t *testing.T) {
+		t.Run("leaves it unread for an app none of whose processes were read", func(t *testing.T) {
+			l := newLedger()
+
+			l.Record([]process{holding(1, chrome, 100, math.NaN())})
+
+			if got := l.Usage()[chromeGroup].Gauges[threads]; !math.IsNaN(got) {
+				t.Fatalf("got %v, want NaN", got)
+			}
+		})
+
+		t.Run("sums the processes that were read", func(t *testing.T) {
+			l := newLedger()
+
+			l.Record([]process{holding(1, chrome, 1, 3), holding(2, chrome, 1, math.NaN()), holding(3, chrome, 1, 4)})
+
+			if got := l.Usage()[chromeGroup].Gauges[threads]; got != 7 {
+				t.Fatalf("got %v, want 7", got)
 			}
 		})
 	})

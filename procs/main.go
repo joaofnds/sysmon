@@ -1,5 +1,6 @@
 // Command sysmon-procs serves, in the Prometheus text format, what each app on this Mac
-// uses: CPU time, memory, disk, network, GPU time and energy.
+// uses: CPU time, memory, disk, network, GPU time, energy, wakeups, page-ins, threads
+// and open files and sockets.
 package main
 
 import (
@@ -108,18 +109,33 @@ func sample(ctx context.Context) ([]process, error) {
 
 	processes := make([]process, 0, len(listed))
 	for _, p := range listed {
-		c := counters{cpuSeconds: p.CPUSeconds, gpuSeconds: gpu[p.PID]}
-		if u, ok := resourceUsageOf(p.PID); ok {
-			c[diskReadBytes], c[diskWrittenBytes], c[energyJoules] = u.DiskReadBytes, u.DiskWrittenBytes, u.EnergyJoules
-		} else {
-			c[diskReadBytes], c[diskWrittenBytes], c[energyJoules] = math.NaN(), math.NaN(), math.NaN()
+		u := resourceUsageOf(p.PID)
+		c := counters{
+			cpuSeconds:       p.CPUSeconds,
+			gpuSeconds:       gpu[p.PID],
+			diskReadBytes:    u.DiskReadBytes,
+			diskWrittenBytes: u.DiskWrittenBytes,
+			energyJoules:     u.EnergyJoules,
+			idleWakeups:      u.IdleWakeups,
+			pageIns:          u.PageIns,
 		}
 		if n, ok := network[p.PID]; ok {
 			c[networkReceivedBytes], c[networkSentBytes] = float64(n.Received), float64(n.Sent)
 		} else {
 			c[networkReceivedBytes], c[networkSentBytes] = math.NaN(), math.NaN()
 		}
-		processes = append(processes, process{PID: p.PID, Executable: p.Path, ResidentBytes: p.ResidentBytes, Counters: c})
+
+		r := openResourcesOf(p.PID)
+		g := gauges{
+			residentBytes:   float64(p.ResidentBytes),
+			footprintBytes:  u.FootprintBytes,
+			threads:         r.Threads,
+			openFiles:       r.Files,
+			openSockets:     r.Sockets,
+			openDescriptors: r.Descriptors,
+		}
+
+		processes = append(processes, process{PID: p.PID, Executable: p.Path, Gauges: g, Counters: c})
 	}
 	return processes, nil
 }

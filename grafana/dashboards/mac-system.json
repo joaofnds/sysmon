@@ -1063,7 +1063,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 69,
+        "y": 102,
         "w": 24,
         "h": 1
       },
@@ -1079,7 +1079,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 70,
+        "y": 103,
         "w": 9,
         "h": 8
       },
@@ -1200,7 +1200,7 @@
       },
       "gridPos": {
         "x": 9,
-        "y": 70,
+        "y": 103,
         "w": 5,
         "h": 8
       },
@@ -1277,7 +1277,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 70,
+        "y": 103,
         "w": 10,
         "h": 8
       },
@@ -1329,7 +1329,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 78,
+        "y": 111,
         "w": 24,
         "h": 1
       },
@@ -1345,7 +1345,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 79,
+        "y": 112,
         "w": 12,
         "h": 8
       },
@@ -1467,7 +1467,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 79,
+        "y": 112,
         "w": 12,
         "h": 8
       },
@@ -1562,7 +1562,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 87,
+        "y": 120,
         "w": 24,
         "h": 1
       },
@@ -1578,7 +1578,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 88,
+        "y": 121,
         "w": 12,
         "h": 8
       },
@@ -1687,7 +1687,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 88,
+        "y": 121,
         "w": 12,
         "h": 8
       },
@@ -1794,7 +1794,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 96,
+        "y": 129,
         "w": 24,
         "h": 1
       },
@@ -1810,7 +1810,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 97,
+        "y": 130,
         "w": 12,
         "h": 8
       },
@@ -1917,7 +1917,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 97,
+        "y": 130,
         "w": 6,
         "h": 8
       },
@@ -2024,7 +2024,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 97,
+        "y": 130,
         "w": 6,
         "h": 8
       },
@@ -2128,7 +2128,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 105,
+        "y": 138,
         "w": 24,
         "h": 1
       },
@@ -2144,7 +2144,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 106,
+        "y": 139,
         "w": 12,
         "h": 8
       },
@@ -2244,7 +2244,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 106,
+        "y": 139,
         "w": 6,
         "h": 8
       },
@@ -2299,7 +2299,7 @@
       },
       "gridPos": {
         "x": 18,
-        "y": 106,
+        "y": 139,
         "w": 6,
         "h": 8
       },
@@ -2382,7 +2382,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 114,
+        "y": 147,
         "w": 24,
         "h": 1
       },
@@ -2398,7 +2398,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 115,
+        "y": 148,
         "w": 24,
         "h": 6
       },
@@ -2714,7 +2714,7 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_network_received_bytes_total[1m]) + rate(sysmon_process_network_sent_bytes_total[1m]))) > 0))",
+          "expr": "sort_desc(topk(10, (round(sum by (app) (rate(sysmon_process_network_received_bytes_total[1m]) + rate(sysmon_process_network_sent_bytes_total[1m])))) > 0))",
           "legendFormat": "{{app}}",
           "format": "table",
           "instant": true,
@@ -2806,7 +2806,7 @@
             "type": "prometheus",
             "uid": "victoriametrics"
           },
-          "expr": "sort_desc(topk(10, (sum by (app) (rate(sysmon_process_disk_read_bytes_total[1m]) + rate(sysmon_process_disk_written_bytes_total[1m]))) > 0))",
+          "expr": "sort_desc(topk(10, (round(sum by (app) (rate(sysmon_process_disk_read_bytes_total[1m]) + rate(sysmon_process_disk_written_bytes_total[1m])))) > 0))",
           "legendFormat": "{{app}}",
           "format": "table",
           "instant": true,
@@ -3785,6 +3785,388 @@
     },
     {
       "id": 50,
+      "type": "table",
+      "title": "Processes now",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 61,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_count{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_cpu_seconds_total{app=\"$app\"}[1m])) * 100",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_resident_bytes{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_footprint_bytes{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "round(sum by (process) (rate(sysmon_process_network_received_bytes_total{app=\"$app\"}[1m]) + rate(sysmon_process_network_sent_bytes_total{app=\"$app\"}[1m])))",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "round(sum by (process) (rate(sysmon_process_disk_read_bytes_total{app=\"$app\"}[1m]) + rate(sysmon_process_disk_written_bytes_total{app=\"$app\"}[1m])))",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_gpu_seconds_total{app=\"$app\"}[1m])) * 100",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "H",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_energy_joules_total{app=\"$app\"}[1m]))",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "I",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_idle_wakeups_total{app=\"$app\"}[1m]))",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "J",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_threads{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "K",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_open_files{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        },
+        {
+          "refId": "L",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_open_sockets{app=\"$app\"})",
+          "legendFormat": "",
+          "format": "table",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "custom": {
+            "minWidth": 70
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Processes"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resident"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Footprint"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Network"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "Bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Disk"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "Bps"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Power"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "watt"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Wakeups"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix:/s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threads"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Open files"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sockets"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "process"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 260
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "CPU",
+            "desc": true
+          }
+        ]
+      },
+      "description": "Every process of the app, with what it used over the last minute and what it holds now. A blank cell has no reading behind it. macOS does not let this user read the footprint, disk, power, wakeups, threads, files or sockets of other users' processes, and network stays blank for a process that has held no external connection since sysmon started. Pick the app in the menu at the top.",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "Processes",
+              "Value #B": "CPU",
+              "Value #C": "Resident",
+              "Value #D": "Footprint",
+              "Value #E": "Network",
+              "Value #F": "Disk",
+              "Value #G": "GPU",
+              "Value #H": "Power",
+              "Value #I": "Wakeups",
+              "Value #J": "Threads",
+              "Value #K": "Open files",
+              "Value #L": "Sockets"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 51,
       "type": "timeseries",
       "title": "CPU by process",
       "datasource": {
@@ -3793,8 +4175,8 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 61,
-        "w": 12,
+        "y": 69,
+        "w": 8,
         "h": 8
       },
       "targets": [
@@ -3843,17 +4225,17 @@
       "description": "100% is one core fully busy, as in Activity Monitor. Pick the app in the menu at the top."
     },
     {
-      "id": 51,
+      "id": 52,
       "type": "timeseries",
-      "title": "Memory by process",
+      "title": "Resident memory by process",
       "datasource": {
         "type": "prometheus",
         "uid": "victoriametrics"
       },
       "gridPos": {
-        "x": 12,
-        "y": 61,
-        "w": 12,
+        "x": 8,
+        "y": 69,
+        "w": 8,
         "h": 8
       },
       "targets": [
@@ -3899,7 +4281,633 @@
           "sort": "desc"
         }
       },
-      "description": "Resident memory. Pick the app in the menu at the top."
+      "description": "Memory in RAM. Memory shared between processes counts once for each of them. Pick the app in the menu at the top."
+    },
+    {
+      "id": 53,
+      "type": "timeseries",
+      "title": "Footprint by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 69,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_footprint_bytes{app=\"$app\"})",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "What Activity Monitor shows as Memory: what the process alone is responsible for, compressed and swapped memory included, shared memory left out. A line that only climbs points at a leak. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 54,
+      "type": "timeseries",
+      "title": "Network by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 77,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_network_received_bytes_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}} received"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_network_sent_bytes_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}} sent"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* (sent|written)$"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Received above the line, sent below it, on external interfaces. Pick the app in the menu at the top."
+    },
+    {
+      "id": 55,
+      "type": "timeseries",
+      "title": "Disk by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 77,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_disk_read_bytes_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}} read"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_disk_written_bytes_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}} written"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".* (sent|written)$"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Read above the line, written below it. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 56,
+      "type": "timeseries",
+      "title": "GPU by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 86,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_gpu_seconds_total{app=\"$app\"}[$__rate_interval])) * 100",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Share of GPU time. Pick the app in the menu at the top."
+    },
+    {
+      "id": 57,
+      "type": "timeseries",
+      "title": "Power by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 86,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_energy_joules_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "macOS's estimate of each process's power draw. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 58,
+      "type": "timeseries",
+      "title": "Idle wakeups by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 86,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_idle_wakeups_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:/s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Times per second the process woke the CPU from idle. Frequent wakeups keep the chip out of its low-power states and cost battery even when CPU use looks low. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 59,
+      "type": "timeseries",
+      "title": "Page-ins by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 94,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (rate(sysmon_process_pageins_total{app=\"$app\"}[$__rate_interval]))",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:pages/s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Memory pages per second read in from disk because the process touched memory that was not in RAM, swapped out or in a mapped file. Steady page-ins while swap is in use mean the Mac is short of memory. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 60,
+      "type": "timeseries",
+      "title": "Threads by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 94,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_threads{app=\"$app\"})",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "A count that only climbs points at a thread leak. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 61,
+      "type": "timeseries",
+      "title": "Open files by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 94,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_open_files{app=\"$app\"})",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Files and directories held open. A count that only climbs points at a leaked file handle. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
+    },
+    {
+      "id": 62,
+      "type": "timeseries",
+      "title": "Sockets by process",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 94,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "victoriametrics"
+          },
+          "expr": "sum by (process) (sysmon_process_open_sockets{app=\"$app\"})",
+          "legendFormat": "{{process}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 45,
+            "gradientMode": "none",
+            "showPoints": "never",
+            "spanNulls": 30000,
+            "axisSoftMin": 0,
+            "lineInterpolation": "smooth",
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Network and local sockets held open. Many sockets with little traffic are idle connections kept open. Only processes running as you: macOS does not let other users read the counters of system daemons. Pick the app in the menu at the top."
     }
   ]
 }

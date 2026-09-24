@@ -29,18 +29,26 @@ caused. For ad hoc queries, VictoriaMetrics has its own UI at http://127.0.0.1:8
 The top of the dashboard is the whole machine. Below it, Top apps now ranks apps by CPU,
 memory, network, disk, GPU and energy over the last minute, Apps over time stacks the eight
 biggest apps of each against mactop's whole-machine line, and Inside $app splits the app
-picked at the top into its processes. The app picker starts on the app using the most
-memory.
+picked at the top into its processes. Its table lists each process with its CPU, resident
+memory, footprint, network, disk, GPU, power, idle wakeups, threads, open files and
+sockets, and the charts below it follow each of those per process over time, with
+page-ins. Footprint is the memory figure Activity Monitor shows. A blank cell has no
+reading behind it. The app picker starts on the app using the most memory.
 
 An app is the outermost `.app` bundle a process runs from, so Brave's helpers count as
 Brave Browser. Processes outside any bundle group by executable name. Its limits:
 
 - WebKit's shared services (`com.apple.WebKit.WebContent`, `com.apple.WebKit.GPU`) sit
   outside Safari's and Mail's bundles, so they show under their own names.
-- Disk and energy cover only this user's processes. macOS does not report them for
-  processes of other users without root.
+- Footprint, disk, energy, idle wakeups, page-ins, threads, open files and sockets cover
+  only this user's processes. macOS does not report them for processes of other users
+  without root, so a root process such as WindowServer shows only CPU, resident memory
+  and GPU.
 - Network counts external interfaces only, as mactop does, so traffic between local
-  processes, VictoriaMetrics scraping included, is left out.
+  processes, VictoriaMetrics scraping included, is left out. A process that has held no
+  external connection since `bin/start` has no network reading.
+- Byte rates in the Top apps now and Processes now tables round to whole bytes per
+  second, because Grafana would otherwise show a fraction of a byte as millibytes.
 - Memory is resident memory, which counts shared pages once for each process that maps
   them, so the apps add up to more than the machine's used memory.
 - The kernel's own CPU time belongs to no app, which is most of the gap between the apps

@@ -4,6 +4,7 @@ package main
 #cgo LDFLAGS: -framework IOKit -framework CoreFoundation
 #include <libproc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/resource.h>
 #include <CoreFoundation/CoreFoundation.h>
@@ -78,10 +79,42 @@ static int gpu_clients(gpu_client *clients, int max) {
 static int pid_rusage(int pid, struct rusage_info_v6 *info) {
 	return proc_pid_rusage(pid, RUSAGE_INFO_V6, (rusage_info_t *)info);
 }
+
+// The threads of a process, or -1.
+static int pid_threads(int pid) {
+	struct proc_taskinfo info;
+	if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &info, sizeof info) != sizeof info) return -1;
+	return info.pti_threadnum;
+}
+
+// Counts the open descriptors of a process, and of those the files and the sockets.
+// Returns -1 when the process cannot be read.
+static int pid_descriptors(int pid, int *files, int *sockets) {
+	int size = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);
+	if (size <= 0) return -1;
+	struct proc_fdinfo *fds = malloc(size);
+	if (fds == NULL) return -1;
+	size = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, fds, size);
+	if (size <= 0) {
+		free(fds);
+		return -1;
+	}
+	int n = size / (int)sizeof *fds;
+	*files = *sockets = 0;
+	for (int i = 0; i < n; i++) {
+		if (fds[i].proc_fdtype == PROX_FDTYPE_VNODE) (*files)++;
+		if (fds[i].proc_fdtype == PROX_FDTYPE_SOCKET) (*sockets)++;
+	}
+	free(fds);
+	return n;
+}
 */
 import "C"
 
-import "errors"
+import (
+	"errors"
+	"math"
+)
 
 const maxGPUClients = 4096
 
@@ -101,19 +134,42 @@ func gpuSecondsByPID() (map[int]float64, error) {
 }
 
 type resourceUsage struct {
-	DiskReadBytes, DiskWrittenBytes, EnergyJoules float64
+	DiskReadBytes, DiskWrittenBytes, EnergyJoules, IdleWakeups, PageIns, FootprintBytes float64
 }
 
-// resourceUsageOf reads what macOS accounts to a process. It fails for processes of
-// other users, since that needs root.
-func resourceUsageOf(pid int) (resourceUsage, bool) {
+// resourceUsageOf reads what macOS accounts to a process. Every field is NaN for a
+// process of another user, since reading those needs root.
+func resourceUsageOf(pid int) resourceUsage {
 	var info C.struct_rusage_info_v6
 	if C.pid_rusage(C.int(pid), &info) != 0 {
-		return resourceUsage{}, false
+		nan := math.NaN()
+		return resourceUsage{nan, nan, nan, nan, nan, nan}
 	}
 	return resourceUsage{
 		DiskReadBytes:    float64(info.ri_diskio_bytesread),
 		DiskWrittenBytes: float64(info.ri_diskio_byteswritten),
 		EnergyJoules:     float64(info.ri_energy_nj) / 1e9,
-	}, true
+		IdleWakeups:      float64(info.ri_pkg_idle_wkups),
+		PageIns:          float64(info.ri_pageins),
+		FootprintBytes:   float64(info.ri_phys_footprint),
+	}
+}
+
+type openResources struct {
+	Threads, Files, Sockets, Descriptors float64
+}
+
+// openResourcesOf counts the threads and open descriptors of a process. Each count is
+// NaN where macOS refuses to read it, as it does for processes of other users.
+func openResourcesOf(pid int) openResources {
+	nan := math.NaN()
+	r := openResources{nan, nan, nan, nan}
+	if n := C.pid_threads(C.int(pid)); n >= 0 {
+		r.Threads = float64(n)
+	}
+	var files, sockets C.int
+	if n := C.pid_descriptors(C.int(pid), &files, &sockets); n >= 0 {
+		r.Files, r.Sockets, r.Descriptors = float64(files), float64(sockets), float64(n)
+	}
+	return r
 }
