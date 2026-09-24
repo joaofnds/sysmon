@@ -241,3 +241,7 @@ The first one deletes the metrics and every collected Claude telemetry event.
 
 `nix store gc` is optional. It frees the store paths sysmon used, and also anything else on
 this machine that no GC root holds.
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE).
