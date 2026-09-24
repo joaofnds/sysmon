@@ -14,7 +14,8 @@ it in Grafana. That stack does start on its own, with OrbStack. See Claude telem
 ## Use
 
     bin/start     # starts mactop, waits for its first sample, then VictoriaMetrics
-    bin/status    # running or not, PIDs, CPU% and RSS, scrape target health, data size
+    bin/status    # running or not, PIDs, CPU% and RSS, scrape target health, data size,
+                  # and the state of each Claude telemetry container
     bin/stop      # stops both and removes their PID files
 
 UI: http://127.0.0.1:8428/vmui, with the prepared dashboard under the Dashboards tab.
@@ -33,8 +34,7 @@ Unlike mactop and VictoriaMetrics, it runs in OrbStack and restarts with it. Sta
 
     docker compose -f ~/code/sysmon/compose.yaml up -d
 
-Check it with `docker compose -f ~/code/sysmon/compose.yaml ps`, since `bin/status` covers
-only mactop and VictoriaMetrics.
+`bin/status` reports its containers too.
 
 Rerun it with `--force-recreate` after editing any of its files. The services read their
 files only when they start, `up -d` alone leaves a running container as it is, and the
@@ -109,15 +109,14 @@ intervals to produce its first sample, so a longer interval makes `bin/start` wa
 
     bin/uninstall
 
-It asks for confirmation, stops mactop and VictoriaMetrics, and prints the commands that
-finish the job, without running them:
+It asks for confirmation, stops mactop and VictoriaMetrics, removes the Claude telemetry
+containers, and prints the commands that finish the job, without running them:
 
     rm -rf ~/code/sysmon
     nix store gc
+    docker volume rm claude-telemetry_clickhouse claude-telemetry_grafana
 
-It leaves the Claude telemetry stack running on this folder's files, so stop that stack
-before the `rm` with `docker compose -f ~/code/sysmon/compose.yaml down`. Adding `-v` to it
-also deletes every collected event.
+The last one deletes every collected Claude telemetry event, so skip it to keep them.
 
 `nix store gc` is optional. It frees the store paths sysmon used, and also anything else on
 this machine that no GC root holds.

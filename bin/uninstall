@@ -10,6 +10,7 @@ case $answer in
 esac
 
 bin/stop
+docker compose down
 
 cat <<MSG
 
@@ -21,4 +22,8 @@ Optionally, free the Nix store paths it used (this also collects
 anything else on this machine that has no GC root):
 
   nix store gc
+
+The Claude telemetry events stay in two Docker volumes. To delete them too, run:
+
+  docker volume rm claude-telemetry_clickhouse claude-telemetry_grafana
 MSG

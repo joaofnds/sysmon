@@ -17,3 +17,6 @@ echo "scrape target     ${health:-unknown (victoria-metrics unreachable)}"
 if [ -d data ]; then
   echo "data size         $(du -sh data | cut -f1)"
 fi
+
+docker compose ps --all --format '{{.Service}} {{.State}}' 2>/dev/null |
+  awk '$1 != "schema" { printf "%-17s %s\n", $1, $2; n++ } END { if (!n) print "telemetry stack   not running" }'
