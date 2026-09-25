@@ -18,11 +18,12 @@ three as well. See Claude telemetry below.
 
 ## How the parts fit together
 
-Arrows point the way data flows. A dashed arrow is a pull, where the side receiving the
-data asks for it: VictoriaMetrics scrapes the three collectors, and Grafana queries both
-stores when a dashboard is open. A solid arrow is a push, where the side sending the data
-delivers it unasked: Claude Code sends its events to the collector, which writes them into
+VictoriaMetrics scrapes the three collectors, and Grafana queries both stores when a
+dashboard is open. Claude Code sends its events to the collector, which writes them into
 ClickHouse. Every service listens on 127.0.0.1 only.
+
+Arrows point the way data flows. Dashed arrows are pulls, where the receiver asks for the
+data. Solid arrows are pushes, where the sender delivers it.
 
 ```mermaid
 ---
