@@ -18,11 +18,92 @@ three as well. See Claude telemetry below.
 
 ## How the parts fit together
 
-Arrows point the way data flows. VictoriaMetrics pulls from the three collectors, and
-Grafana reads from both stores when a dashboard is open. Every service listens on
-127.0.0.1 only.
+Arrows point the way data flows. A dashed arrow is a pull, where the side receiving the
+data asks for it: VictoriaMetrics scrapes the three collectors, and Grafana queries both
+stores when a dashboard is open. A solid arrow is a push, where the side sending the data
+delivers it unasked: Claude Code sends its events to the collector, which writes them into
+ClickHouse. Every service listens on 127.0.0.1 only.
 
-![mactop and sysmon-procs read macOS and claude-limits reads Anthropic's usage endpoint, VictoriaMetrics scrapes all three, Claude Code's events go through the OpenTelemetry collector into ClickHouse, and Grafana reads both stores.](docs/components.svg)
+```mermaid
+---
+config:
+  theme: base
+  look: classic
+  fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+  markdownAutoWrap: false
+  flowchart:
+    curve: basis
+    nodeSpacing: 18
+    rankSpacing: 56
+    padding: 16
+    wrappingWidth: 400
+  themeVariables:
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+    fontSize: 14px
+    primaryColor: "#F5F6F7"
+    primaryBorderColor: "#BDC1C6"
+    primaryTextColor: "#1A1C1E"
+    lineColor: "#8A8F94"
+    textColor: "#5E6368"
+    clusterBkg: "#FFFFFF"
+    clusterBorder: "#D5D8DC"
+    edgeLabelBackground: "#FFFFFF"
+---
+flowchart LR
+  mac("`**macOS**
+  the machine and each process`")
+  anthropic("`**Anthropic API**
+  every 5 minutes
+  Keychain sign-in`")
+  claude("`**Claude Code**
+  OTLP events`")
+
+  subgraph metrics["bin/sysmon metrics · runs until stopped"]
+    mactop("`**mactop**
+    whole machine
+    :2112`")
+    procs("`**sysmon-procs**
+    each app
+    :2113`")
+    limits("`**claude-limits**
+    plan limits
+    :2114`")
+    vm("`**VictoriaMetrics**
+    :8428
+    data/`")
+  end
+
+  subgraph telemetry["bin/sysmon telemetry · starts at login"]
+    otelcol("`**Collector**
+    OpenTelemetry
+    :4327`")
+    ch("`**ClickHouse**
+    :9327
+    clickhouse-data/`")
+  end
+
+  grafana("`**Grafana**
+  :3030
+  bin/sysmon grafana
+  until logout`")
+
+  mac -.-> mactop & procs
+  anthropic -.-> limits
+  mactop & procs & limits -.-> vm
+  claude --> otelcol
+  otelcol --> ch
+  vm & ch -.-> grafana
+
+  classDef source fill:#F5F6F7,stroke:#BDC1C6,color:#1A1C1E
+  classDef metric fill:#DAF0EC,stroke:#7FC4B8,color:#1A1C1E
+  classDef telem fill:#EDE7F8,stroke:#A990DC,color:#1A1C1E
+  classDef view fill:#E6F1FB,stroke:#8AB4E0,color:#1A1C1E
+  class mac,anthropic,claude source
+  class mactop,procs,limits,vm metric
+  class otelcol,ch telem
+  class grafana view
+  linkStyle default stroke-width:1.5px
+```
 
 ## Use
 
