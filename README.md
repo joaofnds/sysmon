@@ -16,6 +16,46 @@ two run under launchd and start again at login. Grafana charts both kinds of dat
 from `bin/sysmon grafana start` until `bin/sysmon grafana stop` or logout. Nix pins these
 three as well. See Claude telemetry below.
 
+## How the parts fit together
+
+Arrows point the way data flows. VictoriaMetrics pulls from the three collectors, and
+Grafana reads from both stores when a dashboard is open. Every service listens on
+127.0.0.1 only.
+
+```mermaid
+flowchart LR
+  mac[macOS]
+  keychain[Keychain login]
+  anthropic[Anthropic usage endpoint]
+  claude[Claude Code]
+
+  subgraph metrics["bin/sysmon metrics: runs until stopped"]
+    mactop["mactop :2112"]
+    procs["sysmon-procs :2113"]
+    limits["claude-limits :2114"]
+    vm[("VictoriaMetrics :8428<br>data/")]
+  end
+
+  subgraph telemetry["bin/sysmon telemetry: launchd, starts at login"]
+    otelcol["OpenTelemetry collector :4327"]
+    ch[("ClickHouse :9327<br>clickhouse-data/")]
+  end
+
+  grafana["Grafana :3030<br>bin/sysmon grafana, until logout"]
+  browser[Browser]
+
+  mac -- whole machine --> mactop
+  mac -- each process --> procs
+  keychain -- sign-in --> limits
+  anthropic -- every 5 minutes --> limits
+  mactop & procs & limits -- scraped --> vm
+  claude -- OTLP events --> otelcol
+  otelcol -- as otel --> ch
+  vm -- PromQL --> grafana
+  ch -- SQL as read-only grafana --> grafana
+  grafana --> browser
+```
+
 ## Use
 
 `bin/sysmon` starts, stops and reports on every service, and run alone it prints its
