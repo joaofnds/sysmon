@@ -1,3 +1,32 @@
+CREATE DATABASE IF NOT EXISTS otel;
+
+-- ClickHouse rewrites LogAttributes['event.name'] in a query into the key subcolumn, so a sort key on the
+-- map expression would match no view and each would read every event of its range.
+CREATE TABLE IF NOT EXISTS otel.otel_logs
+(
+    `Timestamp` DateTime64(9) CODEC(Delta(8), ZSTD(1)),
+    `TraceId` String CODEC(ZSTD(1)),
+    `SpanId` String CODEC(ZSTD(1)),
+    `TraceFlags` UInt8,
+    `SeverityText` LowCardinality(String) CODEC(ZSTD(1)),
+    `SeverityNumber` UInt8,
+    `ServiceName` LowCardinality(String) CODEC(ZSTD(1)),
+    `Body` String CODEC(ZSTD(1)),
+    `ResourceSchemaUrl` LowCardinality(String) CODEC(ZSTD(1)),
+    `ResourceAttributes` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    `ScopeSchemaUrl` LowCardinality(String) CODEC(ZSTD(1)),
+    `ScopeName` String CODEC(ZSTD(1)),
+    `ScopeVersion` LowCardinality(String) CODEC(ZSTD(1)),
+    `ScopeAttributes` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    `LogAttributes` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    `EventName` String CODEC(ZSTD(1))
+)
+ENGINE = MergeTree
+PARTITION BY toDate(Timestamp)
+ORDER BY (LogAttributes.`key_event.name`, Timestamp)
+SETTINGS ttl_only_drop_parts = 1, map_serialization_version = 'with_buckets',
+  map_serialization_version_for_zero_level_parts = 'with_buckets', map_buckets_min_avg_size = 0;
+
 ALTER TABLE otel.otel_logs MODIFY TTL toDateTime(Timestamp) + INTERVAL 90 DAY;
 
 CREATE OR REPLACE VIEW otel.model_prices AS
