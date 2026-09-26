@@ -1,6 +1,5 @@
 global:
   scrape_interval: 10s
-
 scrape_configs:
   - job_name: mactop
     static_configs:
@@ -11,3 +10,25 @@ scrape_configs:
   - job_name: claude-limits
     static_configs:
       - targets: ["127.0.0.1:2114"]
+  - job_name: victoria-metrics
+    static_configs:
+      - targets: ["127.0.0.1:8428"]
+  - job_name: otelcol
+    static_configs:
+      - targets: ["127.0.0.1:2115"]
+  - job_name: clickhouse
+    static_configs:
+      - targets: ["127.0.0.1:2116"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: >-
+          ClickHouseErrorMetric_.+|ClickHouseProfileEvents_(Query|SelectQuery|InsertQuery|FailedQuery|FailedSelectQuery|FailedInsertQuery|QueryTimeMicroseconds|SelectQueryTimeMicroseconds|InsertQueryTimeMicroseconds|InsertedRows|InsertedBytes|DelayedInserts|DelayedInsertsMilliseconds|RejectedInserts|SelectedRows|SelectedBytes|Merge|MergedRows|MergeTotalMilliseconds|MergeTreeDataWriterCompressedBytes|InsertedWideParts|InsertedCompactParts)|ClickHouseMetrics_(Query|Merge|TCPConnection|MemoryTracking|PartsActive|PartsOutdated|DelayedInserts|BackgroundMergesAndMutationsPoolTask|BackgroundMergesAndMutationsPoolSize)|ClickHouseAsyncMetrics_(Uptime|MaxPartCountForPartition|TotalPartsOfMergeTreeTables|TotalRowsOfMergeTreeTables|TotalBytesOfMergeTreeTables|FilesystemMainPathAvailableBytes|FilesystemMainPathTotalBytes)
+  - job_name: grafana
+    static_configs:
+      - targets: ["127.0.0.1:3030"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: >-
+          grafana_(build_info|http_request_in_flight|http_request_duration_seconds_(bucket|count|sum)|plugin_request_(total|duration_seconds_(bucket|count|sum))|datasource_request_(total|in_flight|duration_seconds_(count|sum)))|process_(cpu_seconds_total|open_fds|start_time_seconds)|go_goroutines|go_memstats_heap_inuse_bytes

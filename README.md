@@ -22,6 +22,10 @@ VictoriaMetrics scrapes the three collectors, and Grafana queries both stores wh
 dashboard is open. Claude Code sends its events to the collector, which writes them into
 ClickHouse. Every service listens on 127.0.0.1 only.
 
+VictoriaMetrics also scrapes the metrics the collector, ClickHouse, Grafana and
+VictoriaMetrics itself report about their own work, so Grafana can chart how each part of
+sysmon is doing. The diagram leaves those arrows out.
+
 Arrows point the way data flows. Dashed arrows are pulls, where the receiver asks for the
 data. Solid arrows are pushes, where the sender delivers it.
 
@@ -261,8 +265,10 @@ cache reads, cache writes and output using the per-model prices in `model_prices
 request whose model is missing from that list, or that ran at a speed other than normal,
 shows all its spend as "Other" on the dashboard.
 
-ClickHouse opens no HTTP port, because its HTTP interface answers any web page. It speaks
-only its native protocol, on 127.0.0.1:9327, and has no `default` user. The collector
+ClickHouse opens no HTTP query interface, because that interface answers any web page. It
+takes queries only over its native protocol, on 127.0.0.1:9327, and has no `default` user.
+Its one HTTP port, 127.0.0.1:2116, serves only its own metrics at `/metrics` and answers
+404 to anything else, queries included. The collector
 connects as `otel`, which may reach only the `otel` database and `scratch`, a database for
 ad hoc tables, and has no `url()`, `file()`, `remote()` or `s3()` access. Grafana connects
 as the `grafana` user from `clickhouse/users.xml`, which may only select from the `otel`
@@ -282,7 +288,7 @@ rerun `bin/sysmon telemetry start`, and restart Grafana with
 
 Grafana, the collector and ClickHouse listen on 127.0.0.1 only. The collector listens on
 4327 rather than 4317 so it does not collide with an application's own OpenTelemetry
-collector.
+collector, and reports its own metrics on 2115. ClickHouse reports its metrics on 2116.
 
 ## Where things live
 

@@ -7,4 +7,12 @@
     <tcp_port>9327</tcp_port>
     <users_config>users.xml</users_config>
     <async_insert_threads>0</async_insert_threads>
+    <prometheus>
+        <port>2116</port>
+        <endpoint>/metrics</endpoint>
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+        <errors>true</errors>
+    </prometheus>
 </clickhouse>

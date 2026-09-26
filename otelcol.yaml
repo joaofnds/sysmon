@@ -19,7 +19,13 @@ exporters:
 service:
   telemetry:
     metrics:
-      level: none
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 127.0.0.1
+                port: 2115
   pipelines:
     logs:
       receivers: [otlp]
