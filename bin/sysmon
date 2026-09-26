@@ -110,7 +110,7 @@ metrics_start() (
   echo "claude-limits started (pid $!)"
   metrics_wait claude-limits 10 limits_listening || metrics_abort
 
-  nohup ./result-victoriametrics/bin/victoria-metrics \
+  GOMAXPROCS=2 nohup ./result-victoriametrics/bin/victoria-metrics \
     -httpListenAddr="$VM_ADDR" \
     -storageDataPath=data \
     -retentionPeriod="$RETENTION" \
