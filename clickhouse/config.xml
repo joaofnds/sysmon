@@ -6,4 +6,5 @@
     <listen_host>127.0.0.1</listen_host>
     <tcp_port>9327</tcp_port>
     <users_config>users.xml</users_config>
+    <async_insert_threads>0</async_insert_threads>
 </clickhouse>
