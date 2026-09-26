@@ -10,7 +10,11 @@ exporters:
     database: otel
     username: otel
     password: ${file:secrets/clickhouse-otel}
-    create_schema: true
+    create_schema: false
+    async_insert: false
+    sending_queue:
+      batch:
+        flush_timeout: 10s
 
 service:
   telemetry:
