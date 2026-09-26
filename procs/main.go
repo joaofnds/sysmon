@@ -4,7 +4,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"flag"
@@ -15,7 +14,6 @@ import (
 	"os"
 	"os/signal"
 	"sync"
-	"sync/atomic"
 	"syscall"
 	"time"
 )
@@ -28,20 +26,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	var page atomic.Pointer[[]byte]
-	http.HandleFunc("/metrics", func(w http.ResponseWriter, _ *http.Request) {
-		p := page.Load()
-		if p == nil {
-			http.Error(w, "no sample yet", http.StatusServiceUnavailable)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
-		w.Write(*p)
-	})
+	page := newMetricsPage(time.Now)
+	http.Handle("/metrics", page)
 	server := &http.Server{Addr: *listen, ReadHeaderTimeout: 5 * time.Second}
 
 	var wg sync.WaitGroup
-	wg.Go(func() { sampleEvery(ctx, *interval, &page) })
+	wg.Go(func() { sampleEvery(ctx, *interval, page) })
 
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- server.ListenAndServe() }()
@@ -60,25 +50,18 @@ func main() {
 	wg.Wait()
 }
 
-func sampleEvery(ctx context.Context, interval time.Duration, page *atomic.Pointer[[]byte]) {
-	l := newLedger()
+func sampleEvery(ctx context.Context, interval time.Duration, page *metricsPage) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
 		sampleCtx, cancel := context.WithTimeout(ctx, interval)
-		processes, err := sample(sampleCtx)
+		err := page.refresh(sampleCtx, sample)
 		cancel()
 		if err != nil {
 			if ctx.Err() != nil {
 				return
 			}
 			log.Print(err)
-		} else {
-			l.Record(processes)
-			var b bytes.Buffer
-			writeMetrics(&b, l.Totals(), l.Usage())
-			p := b.Bytes()
-			page.Store(&p)
 		}
 		select {
 		case <-ctx.Done():

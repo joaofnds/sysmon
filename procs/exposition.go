@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var counterMetrics = [counterKinds]struct{ name, help string }{
@@ -57,6 +58,12 @@ func writeMetrics(w io.Writer, totals map[group]counters, current map[group]usag
 	for _, g := range groups {
 		fmt.Fprintf(w, "sysmon_process_count%s %d\n", labels(g), current[g].Processes)
 	}
+}
+
+func writeSampleDuration(w io.Writer, took time.Duration) {
+	fmt.Fprintf(w, "# HELP sysmon_procs_sample_duration_seconds How long the last sample of every process took.\n"+
+		"# TYPE sysmon_procs_sample_duration_seconds gauge\n"+
+		"sysmon_procs_sample_duration_seconds %s\n", strconv.FormatFloat(took.Seconds(), 'g', -1, 64))
 }
 
 func sortedGroups[V any](m map[group]V) []group {

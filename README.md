@@ -176,6 +176,10 @@ samples where those readings spike and the occasional impossible network sample.
 All four listen on 127.0.0.1 only: mactop on port 2112, sysmon-procs on 2113,
 claude-limits on 2114, VictoriaMetrics on 8428.
 
+When a sample of the processes fails, `sysmon-procs` answers 503 until the next one
+succeeds, so VictoriaMetrics marks it down, the charts leave a gap rather than repeat the
+sample before, and `logs/sysmon-procs.log` says why.
+
 ## Claude plan limits
 
 `claude-limits` reads how much of the Claude plan's five-hour session limit, its weekly
