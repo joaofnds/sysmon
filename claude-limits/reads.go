@@ -16,6 +16,7 @@ import (
 type readsPage struct {
 	mu          sync.Mutex
 	outcomes    map[string]int
+	lastOutcome string
 	lastSuccess time.Time
 	lastTook    time.Duration
 }
@@ -27,7 +28,8 @@ func (r *readsPage) record(err error, took time.Duration, at time.Time) {
 	if r.outcomes == nil {
 		r.outcomes = map[string]int{}
 	}
-	r.outcomes[outcomeOf(err)]++
+	r.lastOutcome = outcomeOf(err)
+	r.outcomes[r.lastOutcome]++
 	r.lastTook = took
 	if err == nil {
 		r.lastSuccess = at
@@ -59,6 +61,12 @@ func (r *readsPage) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 		"# TYPE claude_limits_reads_total counter\n")
 	for _, outcome := range slices.Sorted(maps.Keys(r.outcomes)) {
 		fmt.Fprintf(w, "claude_limits_reads_total{outcome=%q} %d\n", outcome, r.outcomes[outcome])
+	}
+
+	if r.lastOutcome != "" {
+		fmt.Fprintf(w, "# HELP claude_limits_last_read_outcome The outcome of the last read of the usage API, as its one series set to 1.\n"+
+			"# TYPE claude_limits_last_read_outcome gauge\n"+
+			"claude_limits_last_read_outcome{outcome=%q} 1\n", r.lastOutcome)
 	}
 
 	fmt.Fprintf(w, "# HELP claude_limits_last_read_duration_seconds How long the last read of the usage API took.\n"+

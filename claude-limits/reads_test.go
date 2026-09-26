@@ -76,6 +76,27 @@ func TestReadsPage(t *testing.T) {
 		assertServes(t, &reads, `claude_limits_reads_total{outcome="failed"} 1`+"\n")
 	})
 
+	t.Run("reports the outcome of the last read alone", func(t *testing.T) {
+		var reads readsPage
+		readOnce(t, &reads, succeeding)
+
+		readOnce(t, &reads, answeredWith(http.StatusTooManyRequests, `{"type":"error"}`))
+
+		assertServes(t, &reads, `claude_limits_last_read_outcome{outcome="http_429"} 1`+"\n")
+		if body := scrape(&reads).Body.String(); strings.Contains(body, `claude_limits_last_read_outcome{outcome="ok"}`) {
+			t.Fatalf("still reports an earlier outcome in\n%s", body)
+		}
+	})
+
+	t.Run("reports a success after a refused read", func(t *testing.T) {
+		var reads readsPage
+		readOnce(t, &reads, answeredWith(http.StatusUnauthorized, `{"type":"error"}`))
+
+		readOnce(t, &reads, succeeding)
+
+		assertServes(t, &reads, `claude_limits_last_read_outcome{outcome="ok"} 1`+"\n")
+	})
+
 	t.Run("reports when a read last succeeded", func(t *testing.T) {
 		var reads readsPage
 		reads.record(succeeding(t), time.Second, readAt)
@@ -91,6 +112,16 @@ func TestReadsPage(t *testing.T) {
 		reads.record(succeeding(t), 420*time.Millisecond, readAt)
 
 		assertServes(t, &reads, "claude_limits_last_read_duration_seconds 0.42\n")
+	})
+
+	t.Run("when no read has happened yet", func(t *testing.T) {
+		t.Run("leaves out the last outcome", func(t *testing.T) {
+			var reads readsPage
+
+			if body := scrape(&reads).Body.String(); strings.Contains(body, "claude_limits_last_read_outcome{") {
+				t.Fatalf("wrote a last outcome in\n%s", body)
+			}
+		})
 	})
 
 	t.Run("when no read has succeeded", func(t *testing.T) {

@@ -209,9 +209,9 @@ charts leave a gap rather than repeat an old reading, and `logs/claude-limits.lo
 `/reads` on the same port answers even then. It counts the reads since `claude-limits`
 started by how each ended: `ok`, `http_429` when the endpoint throttles them, `http_401`
 when the login expired, another `http_` code for any other refusal, `no_login` when the
-Keychain holds no Claude.ai login, and `failed` for anything else. It also gives how long
-the last read took and when a read last succeeded. VictoriaMetrics scrapes it as the
-`claude-limits-reads` target.
+Keychain holds no Claude.ai login, and `failed` for anything else. It also gives how the
+last read ended, how long it took and when a read last succeeded. VictoriaMetrics scrapes
+it as the `claude-limits-reads` target.
 
 ## Claude telemetry
 
