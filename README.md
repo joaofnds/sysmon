@@ -217,16 +217,16 @@ object of `~/.claude/settings.json` holds these entries:
 On this Mac chezmoi renders that file from `dot_claude/private_settings.json` in the
 [dotfiles repository](https://github.com/joaofnds/dotfiles), so change them there.
 
-    bin/sysmon telemetry start   # starts ClickHouse and the collector under launchd, waits
-                                 # for the events table, and applies schema.sql
+    bin/sysmon telemetry start   # starts ClickHouse under launchd, applies schema.sql, then
+                                 # starts the collector under launchd
     bin/sysmon telemetry stop    # stops both and removes their launchd agents
 
 Unlike mactop and VictoriaMetrics, the collector and ClickHouse keep running once started:
 launchd restarts either one when it exits and starts both at login, until
 `bin/sysmon telemetry stop`. Their agents are `sysmon.clickhouse` and `sysmon.otelcol` in
 `~/Library/LaunchAgents`, and they log to `logs/clickhouse.log` and `logs/otelcol.log`. At
-login the collector can start before ClickHouse accepts connections. It then exits, and
-launchd starts it again every ten seconds until ClickHouse does. Rerun
+login the collector can start before ClickHouse accepts connections. It then holds the
+events it cannot insert and retries them for five minutes, after which it drops them. Rerun
 `bin/sysmon telemetry start` after editing `otelcol.yaml`, `clickhouse/` or `schema.sql`,
 because the services read their files only when they start.
 
@@ -252,12 +252,14 @@ The collected events live in `clickhouse-data/`. To query them:
 one, so it configures none of ClickHouse's own system log tables, which in the stock config
 double its idle CPU and memory.
 
-`schema.sql` defines the views to query (`api_requests`, `prompts`, `tool_results`,
-`subagent_runs`, `session_first_prompts`) and keeps 90 days of events. To change that, edit
-`INTERVAL 90 DAY` on its first line and rerun `bin/sysmon telemetry start`. `api_requests`
-splits each request's cost into input, cache reads, cache writes and output using the
-per-model prices in `model_prices`. A request whose model is missing from that list, or
-that ran at a speed other than normal, shows all its spend as "Other" on the dashboard.
+`schema.sql` creates the events table, defines the views to query (`api_requests`,
+`prompts`, `tool_results`, `subagent_runs`, `session_first_prompts`) and keeps 90 days of
+events. Its `CREATE TABLE` applies only while the table does not exist, so retention lives
+in the `ALTER TABLE` line after it. To change retention, edit `INTERVAL 90 DAY` there and
+rerun `bin/sysmon telemetry start`. `api_requests` splits each request's cost into input,
+cache reads, cache writes and output using the per-model prices in `model_prices`. A
+request whose model is missing from that list, or that ran at a speed other than normal,
+shows all its spend as "Other" on the dashboard.
 
 ClickHouse opens no HTTP port, because its HTTP interface answers any web page. It speaks
 only its native protocol, on 127.0.0.1:9327, and has no `default` user. The collector
@@ -303,7 +305,7 @@ collector.
 | `flake.nix`, `flake.lock` | The pinned packages |
 | `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
 | `clickhouse/` | ClickHouse server settings, its users (`otel` for the collector and the read-only `grafana`), and `server`, the script launchd starts ClickHouse with |
-| `schema.sql` | Claude telemetry retention and query views |
+| `schema.sql` | The Claude telemetry events table, its retention, and the query views |
 | `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
 | `grafana/mac-system.py` | The script that writes the Mac system dashboard |
 
