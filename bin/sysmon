@@ -284,28 +284,28 @@ show_status() (
   for svc in mactop sysmon-procs claude-limits victoria-metrics $TELEMETRY_AGENTS grafana; do
     if pid=$(pid_of "$svc") || pid=$(agent_pid "$svc"); then
       ps -p "$pid" -o %cpu=,rss= |
-        awk -v svc="$svc" -v pid="$pid" '{ printf "%-17s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
+        awk -v svc="$svc" -v pid="$pid" '{ printf "%-20s running  pid %-6s cpu %5s%%  rss %4d MB\n", svc, pid, $1, $2 / 1024 }'
     elif ! agent_gone "$svc"; then
-      printf '%-17s loaded but not running, see logs/%s.log\n' "$svc" "$svc"
+      printf '%-20s loaded but not running, see logs/%s.log\n' "$svc" "$svc"
     else
-      printf '%-17s stopped\n' "$svc"
+      printf '%-20s stopped\n' "$svc"
     fi
   done
 
   targets=$(curl -s --max-time 3 "http://$VM_ADDR/api/v1/targets" |
     grep -o '"scrapePool":"[^"]*"\|"health":"[a-z]*"' | cut -d'"' -f4 | paste - -)
   if [ -n "$targets" ]; then
-    echo "$targets" | awk '{ printf "%-17s scrape %s\n", $1, $2 }'
+    echo "$targets" | awk '{ printf "%-20s scrape %s\n", $1, $2 }'
   else
-    echo "scrape targets    unknown (victoria-metrics unreachable)"
+    echo "scrape targets       unknown (victoria-metrics unreachable)"
   fi
 
   if [ -d data ]; then
-    echo "data size         $(du -sh data | cut -f1)"
+    echo "data size            $(du -sh data | cut -f1)"
   fi
 
   if [ -d clickhouse-data ]; then
-    echo "telemetry size    $(du -sh clickhouse-data | cut -f1)"
+    echo "telemetry size       $(du -sh clickhouse-data | cut -f1)"
   fi
 )
 

@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	listen := flag.String("listen", "127.0.0.1:2114", "address to serve /metrics on")
+	listen := flag.String("listen", "127.0.0.1:2114", "address to serve /metrics and /reads on")
 	interval := flag.Duration("interval", 5*time.Minute, "time between reads of the usage API")
 	flag.Parse()
 
@@ -24,11 +24,13 @@ func main() {
 	defer stop()
 
 	var page metricsPage
+	var reads readsPage
 	http.Handle("/metrics", &page)
+	http.Handle("/reads", &reads)
 	server := &http.Server{Addr: *listen, ReadHeaderTimeout: 5 * time.Second}
 
 	var wg sync.WaitGroup
-	wg.Go(func() { refreshEvery(ctx, *interval, &page, anthropicUsageAPI()) })
+	wg.Go(func() { refreshEvery(ctx, *interval, &page, &reads, anthropicUsageAPI()) })
 
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- server.ListenAndServe() }()
@@ -47,14 +49,20 @@ func main() {
 	wg.Wait()
 }
 
-func refreshEvery(ctx context.Context, interval time.Duration, page *metricsPage, api usageAPI) {
+func refreshEvery(ctx context.Context, interval time.Duration, page *metricsPage, reads *readsPage, api usageAPI) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
 		refreshCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		start := time.Now()
 		err := page.refresh(refreshCtx, keychainCredentials, api)
 		cancel()
-		if err != nil && ctx.Err() == nil {
+		if ctx.Err() != nil {
+			return
+		}
+
+		reads.record(err, time.Since(start), time.Now())
+		if err != nil {
 			log.Print(err)
 		}
 

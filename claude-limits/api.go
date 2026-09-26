@@ -11,6 +11,15 @@ import (
 
 var errUsageAPI = errors.New("the usage API answered with an error status")
 
+type statusError struct {
+	code   int
+	status string
+}
+
+func (e statusError) Error() string { return fmt.Sprintf("%v: %s", errUsageAPI, e.status) }
+
+func (e statusError) Unwrap() error { return errUsageAPI }
+
 // usageAPI is the endpoint Claude Code's /usage reads. Anthropic does not document it.
 type usageAPI struct {
 	client  *http.Client
@@ -39,7 +48,7 @@ func (a usageAPI) limits(ctx context.Context, token string) ([]limit, error) {
 
 	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%w: %s", errUsageAPI, resp.Status)
+		return nil, statusError{code: resp.StatusCode, status: resp.Status}
 	}
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"sync/atomic"
 )
@@ -39,7 +40,7 @@ func (p *metricsPage) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 func readLimits(ctx context.Context, credentials func(context.Context) ([]byte, error), api usageAPI) ([]limit, error) {
 	item, err := credentials(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", errNoAccessToken, err)
 	}
 
 	token, err := accessToken(item)
