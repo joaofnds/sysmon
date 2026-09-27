@@ -301,6 +301,34 @@ Grafana, the collector and ClickHouse listen on 127.0.0.1 only. The collector li
 4327 rather than 4317 so it does not collide with an application's own OpenTelemetry
 collector, and reports its own metrics on 2115. ClickHouse reports its metrics on 2116.
 
+## Is sysmon itself working
+
+Dashboard: http://localhost:3030/d/sysmon-services, while Grafana and the metrics services
+run. It follows the diagram under How the parts fit together: VictoriaMetrics scrapes each
+service's own metrics, and the dashboard reads those and the events table in ClickHouse.
+
+The top says whether to act. The verdict is the worst status of any component: Healthy,
+Slow, Degraded, which usually recovers on its own, or Action needed. Beside it each
+component has one status, from OK through Slow, Throttled, Backlog, Low disk, Too many
+parts and Errors to Down, Login expired, No login, Read failed, Stalled, Rejecting inserts
+and Dropping events. The diagram below repeats the flow with each box bordered in its
+status, the rate along each arrow, and the figures that show whether each part keeps up.
+Status over time shows when each status began, and the table under it says what each
+status means and what to do.
+
+A row per part follows: what VictoriaMetrics scrapes, mactop, sysmon-procs and
+claude-limits, VictoriaMetrics, the collector, ClickHouse, Grafana, and what each service
+costs the Mac in CPU, memory and power.
+
+Opening a dashboard makes VictoriaMetrics queue its queries for one of its 4 query slots,
+so a queue alone is not throttling. The dashboard calls VictoriaMetrics throttled only
+when a query or insert gave up waiting for a slot.
+
+`grafana/sysmon-services.py` writes this dashboard's JSON, so change the script rather than
+the JSON, then run it:
+
+    nix shell nixpkgs#python3 -c python3 grafana/sysmon-services.py
+
 ## Where things live
 
 | Path | Contents |
@@ -323,8 +351,9 @@ collector, and reports its own metrics on 2115. ClickHouse reports its metrics o
 | `otelcol.yaml` | OpenTelemetry collector pipeline into ClickHouse |
 | `clickhouse/` | ClickHouse server settings, its users (`otel` for the collector and the read-only `grafana`), and `server`, the script launchd starts ClickHouse with |
 | `schema.sql` | The Claude telemetry events table, its retention, and the query views |
-| `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage and Mac system dashboards |
+| `grafana/` | Grafana datasources for ClickHouse and VictoriaMetrics, dashboard provisioning, and the Claude usage, Mac system and sysmon services dashboards |
 | `grafana/mac-system.py` | The script that writes the Mac system dashboard |
+| `grafana/sysmon-services.py` | The script that writes the sysmon services dashboard |
 
 The `result-*` links are Nix GC roots: `nix store gc` keeps the packages while the links
 exist.
